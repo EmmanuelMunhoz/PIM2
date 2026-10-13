@@ -1,0 +1,7 @@
+# Executaveis e arquivos gerados pelo compilador
+*.exe
+*.o
+*.obj
+
+# Configuracoes locais do VS Code
+.vscode/
