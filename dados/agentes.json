@@ -1,0 +1,137 @@
+[
+  {
+    "id": 1,
+    "nome": "Agente2",
+    "descricao": "Descrição de teste 2",
+    "categoria": "Categoria de teste 2",
+    "instrucoes": "Vc é um agente teste do tipo 2",
+    "status": 1,
+    "notaMedia": null
+  },
+  {
+    "id": 2,
+    "nome": "TestePersistencia",
+    "descricao": "Teste de persistencia JSON",
+    "categoria": "Teste",
+    "instrucoes": "Agente utilizado para validar cadastro",
+    "status": 1,
+    "notaMedia": null
+  },
+  {
+    "id": 3,
+    "nome": "Professor Matematica",
+    "descricao": "Ajuda a resolver problemas matematicos",
+    "categoria": "Educacao",
+    "instrucoes": "Explique os calculos passo a passo",
+    "status": 1,
+    "notaMedia": null
+  },
+  {
+    "id": 4,
+    "nome": "Assistente Python",
+    "descricao": "Auxilia na programacao em Python",
+    "categoria": "Tecnologia",
+    "instrucoes": "Explique codigos e corrija erros",
+    "status": 1,
+    "notaMedia": null
+  },
+  {
+    "id": 5,
+    "nome": "Nutricionista Virtual",
+    "descricao": "Fornece informacoes gerais sobre alimentacao",
+    "categoria": "Saude",
+    "instrucoes": "Apresente orientacoes educativas",
+    "status": 1,
+    "notaMedia": null
+  },
+  {
+    "id": 6,
+    "nome": "Tradutor Multilingue",
+    "descricao": "Auxilia na traducao de textos",
+    "categoria": "Idiomas",
+    "instrucoes": "Traduza textos preservando o significado",
+    "status": 1,
+    "notaMedia": null
+  },
+  {
+    "id": 7,
+    "nome": "Planejador Financeiro",
+    "descricao": "Ajuda na organizacao financeira",
+    "categoria": "Financas",
+    "instrucoes": "Explique conceitos e organize despesas",
+    "status": 1,
+    "notaMedia": null
+  },
+  {
+    "id": 8,
+    "nome": "Professor Historia",
+    "descricao": "Explica acontecimentos historicos",
+    "categoria": "Educacao",
+    "instrucoes": "Apresente fatos com contexto historico",
+    "status": 1,
+    "notaMedia": null
+  },
+  {
+    "id": 9,
+    "nome": "Assistente Marketing",
+    "descricao": "Auxilia na criacao de estrategias de marketing",
+    "categoria": "Marketing",
+    "instrucoes": "Sugira ideias de comunicacao",
+    "status": 1,
+    "notaMedia": null
+  },
+  {
+    "id": 10,
+    "nome": "Orientador Carreira",
+    "descricao": "Auxilia no planejamento profissional",
+    "categoria": "Carreira",
+    "instrucoes": "Sugira caminhos de desenvolvimento profissional",
+    "status": 1,
+    "notaMedia": null
+  },
+  {
+    "id": 11,
+    "nome": "Professor Portugues",
+    "descricao": "Auxilia no aprendizado da lingua portuguesa",
+    "categoria": "Educacao",
+    "instrucoes": "Explique gramatica e ortografia com exemplos",
+    "status": 1,
+    "notaMedia": null
+  },
+  {
+    "id": 12,
+    "nome": "Especialista Excel",
+    "descricao": "Auxilia na utilizacao de planilhas",
+    "categoria": "Tecnologia",
+    "instrucoes": "Explique formulas e organizacao de dados",
+    "status": 1,
+    "notaMedia": null
+  },
+  {
+    "id": 13,
+    "nome": "Assistente Juridico",
+    "descricao": "Fornece informacoes gerais sobre legislacao",
+    "categoria": "Direito",
+    "instrucoes": "Explique conceitos juridicos sem substituir um advogado",
+    "status": 1,
+    "notaMedia": null
+  },
+  {
+    "id": 14,
+    "nome": "Planejador Viagens",
+    "descricao": "Auxilia na organizacao de viagens",
+    "categoria": "Turismo",
+    "instrucoes": "Sugira roteiros e organize itinerarios",
+    "status": 1,
+    "notaMedia": null
+  },
+  {
+    "id": 15,
+    "nome": "Professor Ingles",
+    "descricao": "Ajuda no aprendizado do idioma ingles",
+    "categoria": "Idiomas",
+    "instrucoes": "Explique vocabulario e gramatica com exemplos",
+    "status": 1,
+    "notaMedia": null
+  }
+]

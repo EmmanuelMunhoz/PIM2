@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-#include <time.h>
 #include "functions.h"
 #define TAM 3
 #define MAX_AGENTES 50
@@ -9,7 +8,6 @@
 #define MAX_DESCRICAO 1001
 #define MAX_CATEGORIA 51
 #define MAX_INSTRUCOES 1001
-#define TAM_DATA 20
 
 int quantidadeAgentes = 0;
 int proximoIdAgente = 1;
@@ -18,10 +16,10 @@ char nomesAgentes[MAX_AGENTES][MAX_NOME];
 char descricaoAgentes[MAX_AGENTES][MAX_DESCRICAO];
 char categoriasAgentes[MAX_AGENTES][MAX_CATEGORIA];
 char instrucoesAgentes[MAX_AGENTES][MAX_INSTRUCOES];
-char datasCriacaoAgentes[MAX_AGENTES][TAM_DATA];
 int statusAgentes[MAX_AGENTES];
 double mediasAgentes[MAX_AGENTES];
 int quantidadesAvaliacoesAgentes[MAX_AGENTES];
+int possuiMediaAgentes[MAX_AGENTES];
 
 const char valor_digitado_errado[] = "\n\033[31m⚠️  Valor digitado Invalido!⚠️\033[0m\n"; //variavel global de erro;
 
@@ -137,9 +135,10 @@ int autenticarAdm(void)
                 printf("\033[31m\nSenha Incorreta, tentativas restantes [%d] tentativa(s)\033[0m\n", tentativas - 1);
                 tentativas --;
             }
+            
             if(strcmp (senhaDigitada,senhaAdm) == 0)
             {
-                printf("\033[32mAcesso Permitido\033[0m\n\n");
+                printf("\n\033[32mAcesso Permitido\033[0m");
                 return 0;
             }
         }
@@ -232,7 +231,6 @@ int menuAdm()
         printf("[2] Listar agentes\n");
         printf("[3] Buscar agente por ID\n");
         printf("[4] Buscar agente por nome\n");
-        printf("[5] Fechar o programar\n");
         printf("[0] Voltar ao menu principal\n\n");
 
         printf("Escolha uma opção: ");
@@ -241,7 +239,7 @@ int menuAdm()
 
         if (retornoEntradaMenu == 1)
             {
-                escolha = validarEntrada(entradaMenu,5);
+                escolha = validarEntrada(entradaMenu,4);
 
                 switch (escolha)
                 {
@@ -265,11 +263,6 @@ int menuAdm()
                         printf("Você escolheu a opção: [%d]\n", escolha);
                         break;
                     } 
-                    case 5:
-                    {
-                        printf("Você escolheu a opção: [%d]\n", escolha);
-                        break;
-                    }                       
                     case 0:
                     { 
                         return 0;
@@ -302,6 +295,11 @@ void cadastrarAgente(void)
     if(quantidadeAgentes >= MAX_AGENTES)
     {
         printf("Não pode ser cadastrado mais AGENTES\n");
+        return;
+    }
+    if (proximoIdAgente <= 0)
+    {
+        printf("Nao ha IDs disponiveis para novos agentes.\n");
         return;
     }
 
@@ -364,113 +362,290 @@ void cadastrarAgente(void)
         return;
     }
 
+    // As aspas e barras invertidas exigiriam tratamento especial no JSON.
+    // Nesta versao simples, esses caracteres nao sao aceitos no cadastro.
+    if (strchr(nomesAgentes[indiceAgente], '"') != NULL ||
+        strchr(nomesAgentes[indiceAgente], '\\') != NULL ||
+        strchr(descricaoAgentes[indiceAgente], '"') != NULL ||
+        strchr(descricaoAgentes[indiceAgente], '\\') != NULL ||
+        strchr(categoriasAgentes[indiceAgente], '"') != NULL ||
+        strchr(categoriasAgentes[indiceAgente], '\\') != NULL ||
+        strchr(instrucoesAgentes[indiceAgente], '"') != NULL ||
+        strchr(instrucoesAgentes[indiceAgente], '\\') != NULL)
+    {
+        printf("Nao use aspas ou barra invertida nos campos do agente.\n");
+        return;
+    }
+
     idsAgentes[indiceAgente] = proximoIdAgente;
     statusAgentes[indiceAgente] = 1;
     mediasAgentes[indiceAgente] = 0.0;
     quantidadesAvaliacoesAgentes[indiceAgente] = 0;
-    datasCriacaoAgentes[indiceAgente][0] = '\0';
-
+    possuiMediaAgentes[indiceAgente] = 0;
     quantidadeAgentes++;
     proximoIdAgente++;
+
+    if (salvarAgentes() == 1)
+    {
+        if (salvarControle() == 1)
+        {
+            printf("\033[32m\nAgente salvo com sucesso!\033[0m");
+            printf("\033[32m\nControle atualizado!\033[0m");
+        }
+        else
+        {
+            quantidadeAgentes--;
+            proximoIdAgente--;
+            if (salvarAgentes() == 1)
+            {
+                printf("Cadastro desfeito porque controle.json nao foi salvo.\n");
+            }
+            else
+            {
+                quantidadeAgentes++;
+                proximoIdAgente++;
+                printf("Falha ao salvar controle e ao desfazer agentes.json. Verifique os arquivos.\n");
+            }
+        }
+    }
+    else
+    {
+        quantidadeAgentes--;
+        proximoIdAgente--;
+        printf("Erro ao salvar agente!\n");
+    }
 }
 
-int salvarControle()
+int carregarControle(void)
 {
-    FILE *arquivoControle;
-    arquivoControle = fopen("dados/controle.json", "w");
-
-    if(arquivoControle == NULL)
+    FILE *arquivo = fopen("dados/controle.json", "r");
+    if (arquivo == NULL)
     {
-        printf("Não foi possivel salvar os dados");
+        if (quantidadeAgentes == 0)
+        {
+            proximoIdAgente = 1;
+            return 1;
+        }
+        printf("Erro ao abrir controle.json!\n");
         return 0;
     }
 
-    int resultadoEscrita = fprintf(arquivoControle,
-    "{\n"
-    "    \"quantidadeAgentes\": %d,\n"
-    "    \"proximoIdAgente\": %d\n"
-    "}\n",
-    quantidadeAgentes,
-    proximoIdAgente);
-
-    if (resultadoEscrita < 0)
+    int quantidadeLida, proximoIdLido;
+    int resultado = fscanf(arquivo," { \"quantidadeAgentes\" : %d , \"proximoIdAgente\" : %d }",&quantidadeLida, &proximoIdLido);
+    int erro = (resultado != 2);
+    if (ferror(arquivo))
     {
-        printf("Erro ao escrever no JSON, fechando arquivo.");
-        
-        fclose(arquivoControle);
-        return 0;
+        erro = 1;
+    }
+    if (fclose(arquivo) == EOF)
+    {
+        erro = 1;
     }
 
-    if (fclose(arquivoControle) == EOF)
+    if (erro || quantidadeLida != quantidadeAgentes ||proximoIdLido <= 0 || quantidadeLida > MAX_AGENTES)
     {
-        printf("Erro ao fechar controle.json!\n");
-        return 0;
-    }
-
-    return 1;   
-}
-
-int salvarAgentes()
-{
-    FILE *arquivoAgentes;
-    arquivoAgentes = fopen("dados/agentes.json", "w");
-
-    if(arquivoAgentes == NULL)
-    {
-        printf("Não foi possivel salvar os dados");
-        return 0;
-    }
-
-    int resultadoEscrita = fprintf(arquivoAgentes, "[\n");
-
-    if (resultadoEscrita < 0)
-    {
-        printf("Erro ao iniciar agentes.json!\n");
-        fclose(arquivoAgentes);
+        printf("Dados inconsistentes em controle.json!\n");
         return 0;
     }
     for (int i = 0; i < quantidadeAgentes; i++)
     {
-        fprintf(arquivoAgentes, "    \"id\": %d,\n", idsAgentes[i]);
-        fprintf(arquivoAgentes, "    \"nome\": \"%s\",\n", nomesAgentes[i]);
-        fprintf(arquivoAgentes, "    \"descricao\": \"%s\",\n", descricaoAgentes[i]);
-        fprintf(arquivoAgentes, "    \"categoria\": \"%s\",\n", categoriasAgentes[i]);
-        fprintf(arquivoAgentes, "    \"instrucoes\": \"%s\",\n", instrucoesAgentes[i]);
-        fprintf(arquivoAgentes, "    \"dataCriacao\": \"%s\",\n", datasCriacaoAgentes[i]);
-        fprintf(arquivoAgentes, "    \"status\": %d,\n", statusAgentes[i]);
-
-        if (quantidadesAvaliacoesAgentes[i] == 0)
+        if (proximoIdLido <= idsAgentes[i])
         {
-            fprintf(arquivoAgentes, "    \"notaMedia\": null\n");
-        }
-        else
-        {
-            fprintf(arquivoAgentes, "    \"notaMedia\": %.1f\n", mediasAgentes[i]);
-        }
-
-        if (i < quantidadeAgentes - 1)
-        {
-            fprintf(arquivoAgentes, "  },\n");
-        }
-        else
-        {
-            fprintf(arquivoAgentes, "  }\n");
+            printf("Proximo ID invalido em controle.json!\n");
+            return 0;
         }
     }
-    fprintf(arquivoAgentes, "]\n");
 
-    if (ferror(arquivoAgentes))
+    proximoIdAgente = proximoIdLido;
+    return 1;
+}
+
+int salvarControle(void)
+{
+    FILE *arquivo = fopen("dados/controle.json", "w");
+    if (arquivo == NULL)
     {
-        printf("Erro ao escrever em agentes.json!\n");
-        fclose(arquivoAgentes);
+        printf("Erro ao abrir controle.json para gravacao!\n");
         return 0;
     }
 
-    if (fclose(arquivoAgentes) == EOF)
+    fprintf(arquivo,"{\n""    \"quantidadeAgentes\": %d,\n""    \"proximoIdAgente\": %d\n""}\n", quantidadeAgentes, proximoIdAgente);
+
+    int erro = ferror(arquivo);
+    if (fclose(arquivo) == EOF)
     {
-        printf("Erro ao fechar agentes.json!\n");
+        erro = 1;
+    }
+    if (erro)
+    {
+        printf("Erro ao gravar controle.json!\n");
+        return 0;
+    }
+    return 1;
+}
+
+int salvarAgentes(void)
+{
+    FILE *arquivo = fopen("dados/agentes.json", "w");
+    if (arquivo == NULL)
+    {
+        printf("Erro ao abrir agentes.json para gravacao!\n");
         return 0;
     }
 
+    fprintf(arquivo, "[\n");
+    for (int i = 0; i < quantidadeAgentes; i++)
+    {
+        fprintf(arquivo, "  {\n");
+        fprintf(arquivo, "    \"id\": %d,\n", idsAgentes[i]);
+        fprintf(arquivo, "    \"nome\": \"%s\",\n", nomesAgentes[i]);
+        fprintf(arquivo, "    \"descricao\": \"%s\",\n", descricaoAgentes[i]);
+        fprintf(arquivo, "    \"categoria\": \"%s\",\n", categoriasAgentes[i]);
+        fprintf(arquivo, "    \"instrucoes\": \"%s\",\n", instrucoesAgentes[i]);
+        fprintf(arquivo, "    \"status\": %d,\n", statusAgentes[i]);
+        if (possuiMediaAgentes[i] == 1)
+        {
+            fprintf(arquivo, "    \"notaMedia\": %.1f\n", mediasAgentes[i]);
+        }
+        else
+        {
+            fprintf(arquivo, "    \"notaMedia\": null\n");
+        }
+        fprintf(arquivo, "  }%s\n", i < quantidadeAgentes - 1 ? "," : "");
+    }
+    fprintf(arquivo, "]\n");
+
+    int erro = ferror(arquivo);
+    if (fclose(arquivo) == EOF)
+    {
+        erro = 1;
+    }
+    if (erro)
+    {
+        printf("Erro ao gravar agentes.json!\n");
+        return 0;
+    }
+    return 1;
+}
+
+int carregarAgentes(void)
+{
+    FILE *arquivo = fopen("dados/agentes.json", "r");
+    if (arquivo == NULL)
+    {
+        quantidadeAgentes = 0;
+        return 1;
+    }
+
+    char linha[1200];
+    int indice = 0;
+    int erro = 0;
+    int fim = 0;
+
+    if (fgets(linha, sizeof(linha), arquivo) == NULL ||strchr(linha, '[') == NULL)
+    {
+        erro = 1;
+    }
+
+    while (erro == 0 && fgets(linha, sizeof(linha), arquivo) != NULL)
+    {
+        if (strchr(linha, ']') != NULL)
+        {
+            fim = 1;
+            break;
+        }
+        if (strchr(linha, '{') == NULL || indice >= MAX_AGENTES)
+        {
+            erro = 1;
+            break;
+        }
+
+        if (fgets(linha, sizeof(linha), arquivo) == NULL ||sscanf(linha, " \"id\": %d", &idsAgentes[indice]) != 1 ||idsAgentes[indice] <= 0)
+        {
+            erro = 1;
+            break;
+        }
+        for (int i = 0; i < indice; i++)
+        {
+            if (idsAgentes[i] == idsAgentes[indice])
+            {
+                erro = 1;
+            }
+        }
+        if (erro) break;
+
+        if (fgets(linha, sizeof(linha), arquivo) == NULL ||sscanf(linha, " \"nome\": \"%80[^\"]\"", nomesAgentes[indice]) != 1 ||
+            fgets(linha, sizeof(linha), arquivo) == NULL ||sscanf(linha, " \"descricao\": \"%1000[^\"]\"", descricaoAgentes[indice]) != 1 ||
+            fgets(linha, sizeof(linha), arquivo) == NULL ||sscanf(linha, " \"categoria\": \"%50[^\"]\"", categoriasAgentes[indice]) != 1 ||
+            fgets(linha, sizeof(linha), arquivo) == NULL ||sscanf(linha, " \"instrucoes\": \"%1000[^\"]\"", instrucoesAgentes[indice]) != 1)
+        {
+            erro = 1;
+            break;
+        }
+
+        if (fgets(linha, sizeof(linha), arquivo) == NULL)
+        {
+            erro = 1;
+            break;
+        }
+        if (strstr(linha, "\"dataCriacao\"") != NULL)
+        {
+            if (fgets(linha, sizeof(linha), arquivo) == NULL)
+            {
+                erro = 1;
+                break;
+            }
+        }
+        if (sscanf(linha, " \"status\": %d", &statusAgentes[indice]) != 1 ||(statusAgentes[indice] != 0 && statusAgentes[indice] != 1))
+        {
+            erro = 1;
+            break;
+        }
+
+        if (fgets(linha, sizeof(linha), arquivo) == NULL)
+        {
+            erro = 1;
+            break;
+        }
+        if (strstr(linha, "\"notaMedia\": null") != NULL)
+        {
+            mediasAgentes[indice] = 0.0;
+            possuiMediaAgentes[indice] = 0;
+        }
+        else if (sscanf(linha, " \"notaMedia\": %lf", &mediasAgentes[indice]) == 1 &&mediasAgentes[indice] >= 0.0 && mediasAgentes[indice] <= 5.0)
+        {
+            possuiMediaAgentes[indice] = 1;
+        }
+        else
+        {
+            erro = 1;
+            break;
+        }
+        quantidadesAvaliacoesAgentes[indice] = 0;
+
+        if (fgets(linha, sizeof(linha), arquivo) == NULL ||strchr(linha, '}') == NULL)
+        {
+            erro = 1;
+            break;
+        }
+        indice++;
+    }
+
+    if (!fim || ferror(arquivo))
+    {
+        erro = 1;
+    }
+    if (fclose(arquivo) == EOF)
+    {
+        erro = 1;
+    }
+    if (erro)
+    {
+        quantidadeAgentes = 0;
+        printf("Erro ao carregar agentes.json!\n");
+        return 0;
+    }
+
+    quantidadeAgentes = indice;
     return 1;
 }

@@ -7,3 +7,5 @@ int menuAdm();
 void cadastrarAgente(void);
 int salvarControle();
 int salvarAgentes();
+int carregarAgentes(void);
+int carregarControle(void);

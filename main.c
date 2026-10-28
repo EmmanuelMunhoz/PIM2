@@ -3,6 +3,12 @@
 
 int main ()
 {
+    if (carregarAgentes() == 0 || carregarControle() == 0)
+    {
+        printf("Falha ao carregar os dados persistentes. Programa encerrado.\n");
+        return 1;
+    }
+
     int retorno = menu ();
     
     if (retorno == -1)
