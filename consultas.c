@@ -1,5 +1,5 @@
-
 #include <stdio.h>
+#include <string.h>
 #include "functions.h"
 
 int catalogoAgentes(void)
@@ -322,4 +322,224 @@ int listarAgentesAdm(void)
         printf("\nOpcao invalida!\n");
 
     } while (1);
+}
+
+
+int fichaAgenteAdm(int indiceAgente)
+{
+    int escolha, leituraOk;
+    char entrada[TAM];
+
+    if (indiceAgente < 0 || indiceAgente >= quantidadeAgentes)
+    {
+        printf("\nAgente invalido!\n");
+        return 0;
+    }
+
+    do
+    {
+        printf("\n========== FICHA ADMINISTRATIVA ==========\n\n");
+        printf("ID: %d\n",idsAgentes[indiceAgente]);
+        printf("Nome: %s\n",nomesAgentes[indiceAgente]);
+        printf("Categoria: %s\n",categoriasAgentes[indiceAgente]);
+        printf("Descricao: %s\n",descricaoAgentes[indiceAgente]);
+        printf("Instrucoes: %s\n",instrucoesAgentes[indiceAgente]);
+        printf("Status: %s\n",statusAgentes[indiceAgente] == 1 ? "ATIVO" : "INATIVO");
+
+        if (possuiMediaAgentes[indiceAgente] == 1)
+        {
+            printf("Nota media: %.1f\n",mediasAgentes[indiceAgente]);
+        }
+        else
+        {
+            printf("Nota media: Sem avaliacoes\n");
+        }
+
+        printf("\n[1] Editar informacoes");
+        printf("\n[0] Voltar a consulta");
+        printf("\n[-1] Encerrar o sistema");
+        printf("\n\nEscolha uma opcao: ");
+
+        leituraOk = lerEntrada(entrada,sizeof(entrada));
+
+        if (leituraOk == -1)
+        {
+            return -1;
+        }
+
+        if (leituraOk != 1)
+        {
+            printf("\nEntrada invalida!\n");
+            continue;
+        }
+
+        escolha = validarEntrada(entrada,1);
+
+        if (escolha == -1)
+        {
+            return -1;
+        }
+
+        if (escolha == 0)
+        {
+            return 0;
+        }
+
+        if (escolha == 1)
+        {
+            if (editarAgente(indiceAgente) == -1)
+            {
+                return -1;
+            }
+
+            continue;
+        }
+
+        printf("\nOpcao invalida!\n");
+
+    } while (1);
+}
+
+
+int buscarAgentePorId(void)
+{
+    char entrada[20];
+    int idBuscado, leituraOk;
+
+    printf("\n========== BUSCAR AGENTE POR ID ==========\n");
+    printf("\nDigite o ID do agente:");
+    printf("\n[0] Voltar");
+    printf("\n[-1] Encerrar o sistema");
+    printf("\n\nID: ");
+
+    leituraOk = lerEntrada(entrada,sizeof(entrada));
+
+    if (leituraOk == -1)
+    {
+        return -1;
+    }
+
+    if (leituraOk != 1)
+    {
+        printf("\nEntrada invalida!\n");
+        return 0;
+    }
+
+    idBuscado = validarEntrada(entrada,999999);
+
+    if (idBuscado == -1)
+    {
+        return -1;
+    }
+
+    if (idBuscado == 0)
+    {
+        return 0;
+    }
+
+    if (idBuscado == -2)
+    {
+        printf("\nID invalido!\n");
+        return 0;
+    }
+
+    for (int i = 0; i < quantidadeAgentes; i++)
+    {
+        if (idsAgentes[i] == idBuscado)
+        {
+            return fichaAgenteAdm(i);
+        }
+    }
+
+    printf("\nAgente nao encontrado!\n");
+    return 0;
+}
+
+
+int buscarAgentePorNome(void)
+{
+    char nomeBusca[MAX_NOME];
+    char entrada[TAM];
+    int posicoes[MAX_AGENTES];
+    int encontrados = 0;
+    int leituraOk, escolha;
+
+    printf("\n========== BUSCAR AGENTE POR NOME ==========\n");
+    printf("\nDigite o nome ou parte do nome:");
+    printf("\n[-1] Encerrar o sistema");
+    printf("\n\nNome: ");
+
+    leituraOk = lerEntrada(nomeBusca,sizeof(nomeBusca));
+
+    if (leituraOk == -1)
+    {
+        return -1;
+    }
+
+    if (leituraOk != 1 || nomeBusca[0] == '\0')
+    {
+        printf("\nNome invalido!\n");
+        return 0;
+    }
+
+    if (strcmp(nomeBusca,"-1") == 0)
+    {
+        return -1;
+    }
+
+    for (int i = 0; i < quantidadeAgentes; i++)
+    {
+        if (strstr(nomesAgentes[i],nomeBusca) != NULL)
+        {
+            posicoes[encontrados] = i;
+            encontrados++;
+
+            printf("\n[%d] ID: %d - %s - %s",
+                   encontrados,idsAgentes[i],nomesAgentes[i],
+                   statusAgentes[i] == 1 ? "ATIVO" : "INATIVO");
+        }
+    }
+
+    if (encontrados == 0)
+    {
+        printf("\nNenhum agente encontrado!\n");
+        return 0;
+    }
+
+    printf("\n\n[0] Voltar ao painel administrativo");
+    printf("\n[-1] Encerrar o sistema");
+    printf("\n\nEscolha um agente: ");
+
+    leituraOk = lerEntrada(entrada,sizeof(entrada));
+
+    if (leituraOk == -1)
+    {
+        return -1;
+    }
+
+    if (leituraOk != 1)
+    {
+        printf("\nEntrada invalida!\n");
+        return 0;
+    }
+
+    escolha = validarEntrada(entrada,encontrados);
+
+    if (escolha == -1)
+    {
+        return -1;
+    }
+
+    if (escolha == 0)
+    {
+        return 0;
+    }
+
+    if (escolha < 1 || escolha > encontrados)
+    {
+        printf("\nOpcao invalida!\n");
+        return 0;
+    }
+
+    return fichaAgenteAdm(posicoes[escolha - 1]);
 }

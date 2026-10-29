@@ -43,5 +43,8 @@ void calcularMediasAvaliacoes(void);
 int registrarAvaliacao(int indiceAgente, int nota);
 int listarAgentesAdm(void);
 int fichaAgenteAdm(int indiceAgente);
+int editarAgente(int indiceAgente);
+int buscarAgentePorId(void);
+int buscarAgentePorNome(void);
 
 #endif

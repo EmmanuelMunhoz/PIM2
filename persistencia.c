@@ -76,6 +76,8 @@ int salvarControle(void)
     return 1;
 }
 
+
+
 int salvarAgentes(void)
 {
     FILE *arquivo = fopen("dados/agentes.json", "w");
@@ -95,6 +97,7 @@ int salvarAgentes(void)
         fprintf(arquivo, "    \"categoria\": \"%s\",\n", categoriasAgentes[i]);
         fprintf(arquivo, "    \"instrucoes\": \"%s\",\n", instrucoesAgentes[i]);
         fprintf(arquivo, "    \"status\": %d,\n", statusAgentes[i]);
+
         if (possuiMediaAgentes[i] == 1)
         {
             fprintf(arquivo, "    \"notaMedia\": %.1f\n", mediasAgentes[i]);
@@ -103,22 +106,28 @@ int salvarAgentes(void)
         {
             fprintf(arquivo, "    \"notaMedia\": null\n");
         }
+
         fprintf(arquivo, "  }%s\n", i < quantidadeAgentes - 1 ? "," : "");
     }
+
     fprintf(arquivo, "]\n");
 
     int erro = ferror(arquivo);
+
     if (fclose(arquivo) == EOF)
     {
         erro = 1;
     }
+
     if (erro)
     {
         printf("Erro ao gravar agentes.json!\n");
         return 0;
     }
+
     return 1;
 }
+
 
 int carregarAgentes(void)
 {

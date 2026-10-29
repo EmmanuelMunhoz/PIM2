@@ -137,12 +137,21 @@ int menuAdm()
                     }
                     case 3:
                     {
-                        printf("Você escolheu a opção: [%d]\n", escolha);
+                        if (buscarAgentePorId() == -1)
+                        {
+                            return -1;
+                        }
+
                         break;
                     }
+
                     case 4:
                     {
-                        printf("Você escolheu a opção: [%d]\n", escolha);
+                        if (buscarAgentePorNome() == -1)
+                        {
+                            return -1;
+                        }
+
                         break;
                     }
                     case 0:
@@ -164,73 +173,7 @@ int menuAdm()
             {
                 continue;
             }
-    }while(retornoEntradaMenu != 0);
+    }while(1);
 
     return 0;
-}
-
-
-int fichaAgenteAdm(int indiceAgente)
-{
-    int escolha, leituraOk;
-    char entrada[TAM];
-
-    do
-    {
-        printf("\n========== FICHA ADMINISTRATIVA ==========\n\n");
-        printf("ID: %d\n",idsAgentes[indiceAgente]);
-        printf("Nome: %s\n",nomesAgentes[indiceAgente]);
-        printf("Categoria: %s\n",categoriasAgentes[indiceAgente]);
-        printf("Descricao: %s\n",descricaoAgentes[indiceAgente]);
-        printf("Instrucoes: %s\n",instrucoesAgentes[indiceAgente]);
-        printf("Status: %s\n",statusAgentes[indiceAgente] == 1 ? "ATIVO" : "INATIVO");
-
-        if (possuiMediaAgentes[indiceAgente] == 1)
-        {
-            printf("Nota media: %.1f\n",mediasAgentes[indiceAgente]);
-        }
-        else
-        {
-            printf("Nota media: Sem avaliacoes\n");
-        }
-
-        printf("\n[1] Editar informacoes");
-        printf("\n[0] Voltar a consulta");
-        printf("\n[-1] Encerrar o sistema");
-        printf("\n\nEscolha uma opcao: ");
-
-        leituraOk = lerEntrada(entrada,sizeof(entrada));
-
-        if (leituraOk == -1)
-        {
-            return -1;
-        }
-
-        if (leituraOk == 0)
-        {
-            printf("\nEntrada invalida!\n");
-            continue;
-        }
-
-        escolha = validarEntrada(entrada,1);
-
-        if (escolha == -1)
-        {
-            return -1;
-        }
-
-        if (escolha == 0)
-        {
-            return 0;
-        }
-
-        if (escolha == 1)
-        {
-            printf("\nEdicao ainda nao implementada.\n");
-            continue;
-        }
-
-        printf("\nOpcao invalida!\n");
-
-    } while (1);
 }
