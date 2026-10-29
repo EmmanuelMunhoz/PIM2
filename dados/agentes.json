@@ -24,7 +24,7 @@
     "categoria": "Educacao",
     "instrucoes": "Explique os calculos passo a passo",
     "status": 1,
-    "notaMedia": null
+    "notaMedia": 4.0
   },
   {
     "id": 4,
@@ -33,7 +33,7 @@
     "categoria": "Tecnologia",
     "instrucoes": "Explique codigos e corrija erros",
     "status": 1,
-    "notaMedia": null
+    "notaMedia": 0.0
   },
   {
     "id": 5,
@@ -131,6 +131,51 @@
     "descricao": "Ajuda no aprendizado do idioma ingles",
     "categoria": "Idiomas",
     "instrucoes": "Explique vocabulario e gramatica com exemplos",
+    "status": 1,
+    "notaMedia": null
+  },
+  {
+    "id": 16,
+    "nome": "Professor Fisica",
+    "descricao": "Auxilia no estudo de conceitos de fisica",
+    "categoria": "Educacao",
+    "instrucoes": "Explique formulas e fenomenos com exemplos",
+    "status": 1,
+    "notaMedia": null
+  },
+  {
+    "id": 17,
+    "nome": "Assistente Quimica",
+    "descricao": "Auxilia no aprendizado de quimica",
+    "categoria": "Educacao",
+    "instrucoes": "Explique reacoes quimicas de forma didatica",
+    "status": 1,
+    "notaMedia": null
+  },
+  {
+    "id": 18,
+    "nome": "Especialista Redes",
+    "descricao": "Auxilia no estudo de redes de computadores",
+    "categoria": "Tecnologia",
+    "instrucoes": "Explique protocolos e conceitos de redes",
+    "status": 1,
+    "notaMedia": null
+  },
+  {
+    "id": 19,
+    "nome": "Professor Geografia",
+    "descricao": "Ensina conceitos de geografia",
+    "categoria": "Educacao",
+    "instrucoes": "Explique temas geograficos com exemplos",
+    "status": 1,
+    "notaMedia": null
+  },
+  {
+    "id": 20,
+    "nome": "Assistente Design",
+    "descricao": "Auxilia na criacao de projetos visuais",
+    "categoria": "Design",
+    "instrucoes": "Sugira ideias e explique principios de design",
     "status": 1,
     "notaMedia": null
   }

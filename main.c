@@ -9,8 +9,14 @@ int main ()
         return 1;
     }
 
+    if (carregarAvaliacoes() == 0)
+    {
+        printf("Erro ao carregar avaliacoes!\n");
+        return 1;
+    }
+
     int retorno = menu ();
-    
+
     if (retorno == -1)
     {
         return 1;
