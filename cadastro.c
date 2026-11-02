@@ -3,6 +3,7 @@
 #include <stdlib.h>   // Funcoes utilitarias do C (nao utilizada diretamente aqui).
 #include "functions.h" // Declaracoes das funcoes compartilhadas entre arquivos.
 
+// Solicita os dados de um agente, atribui seu ID e tenta salvá-los.
 void cadastrarAgente(void)
 {
     int indiceAgente = quantidadeAgentes;
@@ -128,8 +129,7 @@ void cadastrarAgente(void)
     }
 }
 
-
-
+// Edita os campos do agente na posição indicada, incluindo seu status.
 int editarAgente(int indiceAgente)
 {
     int escolha, leituraOk, capacidade;

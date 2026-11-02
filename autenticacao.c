@@ -3,6 +3,7 @@
 #include <stdlib.h>   // Funcoes utilitarias do C (nao utilizada diretamente aqui).
 #include "functions.h" // Declaracoes das funcoes compartilhadas entre arquivos.
 
+// Confere a senha administrativa e permite até três tentativas.
 int autenticarAdm(void)
 {
     int leituraValidarEntradaOk;

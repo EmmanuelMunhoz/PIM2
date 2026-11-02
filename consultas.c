@@ -2,6 +2,7 @@
 #include <string.h>
 #include "functions.h"
 
+// Exibe agentes ativos, suas fichas públicas e permite registrar avaliações.
 int catalogoAgentes(void)
 {
     int i;
@@ -240,7 +241,7 @@ int catalogoAgentes(void)
     } while (1);
 }
 
-
+// Lista todos os agentes e permite abrir a ficha pela posição exibida.
 int listarAgentesAdm(void)
 {
     int i, escolha, leituraOk;
@@ -324,7 +325,7 @@ int listarAgentesAdm(void)
     } while (1);
 }
 
-
+// Exibe a ficha administrativa do agente na posição indicada.
 int fichaAgenteAdm(int indiceAgente)
 {
     int escolha, leituraOk;
@@ -400,7 +401,7 @@ int fichaAgenteAdm(int indiceAgente)
     } while (1);
 }
 
-
+// Busca um agente pelo ID permanente e abre sua ficha administrativa.
 int buscarAgentePorId(void)
 {
     char entrada[20];
@@ -455,7 +456,7 @@ int buscarAgentePorId(void)
     return 0;
 }
 
-
+// Busca agentes por trecho do nome e permite selecionar um resultado.
 int buscarAgentePorNome(void)
 {
     char nomeBusca[MAX_NOME];

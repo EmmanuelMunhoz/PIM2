@@ -3,12 +3,14 @@
 #include <stdlib.h>
 #include "functions.h"
 
+// Descarta os caracteres restantes da linha de entrada.
 void limparBuffer(void)
 {
     int c;
     while((c = getchar()) != '\n' && c != EOF);
 }
 
+// Valida uma opção numérica; retorna -1 para encerrar e -2 para entrada inválida.
 int validarEntrada(char entrada[], int limiteMaximo)
 {
     int i = 0;
@@ -44,7 +46,7 @@ int validarEntrada(char entrada[], int limiteMaximo)
     return -2;
 }
 
-
+// Lê uma linha limitada e retorna 1, 0 ou -1 conforme o resultado da leitura.
 int lerEntrada(char entrada[], int capacidade)
 {
 
@@ -66,6 +68,7 @@ int lerEntrada(char entrada[], int capacidade)
         else
         {
             int procurarN = getchar();
+            
             if (procurarN == '\n')
             {
                 return 1;

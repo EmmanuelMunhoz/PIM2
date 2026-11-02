@@ -16,4 +16,3 @@ int notasAvaliacoes[MAX_AVALIACOES];
 int possuiMediaAgentes[MAX_AGENTES];
 
 const char valor_digitado_errado[] = "\n\033[31m⚠️  Valor digitado Invalido!⚠️\033[0m\n"; //variavel global de erro;
-

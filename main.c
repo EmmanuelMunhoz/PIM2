@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include "functions.h"
 
+// Carrega os arquivos persistentes e inicia o menu principal.
 int main ()
 {
     if (carregarAgentes() == 0 || carregarControle() == 0)

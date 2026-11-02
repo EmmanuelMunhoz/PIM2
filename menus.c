@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include "functions.h"
 
+// Exibe o menu principal e encaminha para o catálogo ou painel administrativo.
 int menu ()
 {
     int escolha, leituraMenuOk;
@@ -27,11 +28,6 @@ int menu ()
 
             switch (escolha)
             {
-
-                case -1:
-                {
-                    return -1;
-                }
                 case 1:
                 {
                     int retornoCatalogo = catalogoAgentes();
@@ -67,6 +63,10 @@ int menu ()
                     printf("Você escolheu a opção: [%d]\n", escolha);
                     break;
                 }
+                case -1:
+                {
+                    return -1;
+                }
                 default:
                 {
                     printf("%s",valor_digitado_errado);
@@ -87,6 +87,7 @@ int menu ()
     return escolha;
 }
 
+// Exibe as opções administrativas e encaminha para as operações escolhidas.
 int menuAdm()
 {
     char entradaMenu[TAM];
@@ -114,11 +115,6 @@ int menuAdm()
 
                 switch (escolha)
                 {
-
-                    case -1:
-                    {
-                        return -1;
-                    }
                     case 1:
                     {
                         cadastrarAgente();
@@ -132,7 +128,6 @@ int menuAdm()
                         {
                             return -1;
                         }
-
                         break;
                     }
                     case 3:
@@ -141,18 +136,19 @@ int menuAdm()
                         {
                             return -1;
                         }
-
                         break;
                     }
-
                     case 4:
                     {
                         if (buscarAgentePorNome() == -1)
                         {
                             return -1;
                         }
-
                         break;
+                    }
+                    case -1:
+                    {
+                        return -1;
                     }
                     case 0:
                     {

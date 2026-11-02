@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include "functions.h"
 
+// Lê e valida os contadores do controle em relação aos agentes carregados.
 int carregarControle(void)
 {
     FILE *arquivo = fopen("dados/controle.json", "r");
@@ -48,6 +49,7 @@ int carregarControle(void)
     return 1;
 }
 
+// Grava a quantidade de agentes e o próximo ID em controle.json.
 int salvarControle(void)
 {
     FILE *arquivo = fopen("dados/controle.json", "w");
@@ -76,8 +78,7 @@ int salvarControle(void)
     return 1;
 }
 
-
-
+// Grava diretamente em agentes.json os agentes e suas médias.
 int salvarAgentes(void)
 {
     FILE *arquivo = fopen("dados/agentes.json", "w");
@@ -128,7 +129,7 @@ int salvarAgentes(void)
     return 1;
 }
 
-
+// Carrega e valida os registros de agentes nos vetores paralelos.
 int carregarAgentes(void)
 {
     FILE *arquivo = fopen("dados/agentes.json", "r");
@@ -259,6 +260,7 @@ int carregarAgentes(void)
     return 1;
 }
 
+// Carrega as notas individuais e associa cada uma a um agente existente.
 int carregarAvaliacoes(void)
 {
     FILE *arquivo = fopen("dados/avaliacoes.json", "r");
@@ -333,6 +335,7 @@ int carregarAvaliacoes(void)
     return 0;
 }
 
+// Grava em avaliacoes.json os IDs dos agentes e suas notas individuais.
 int salvarAvaliacoes(void)
 {
     FILE *arquivo = fopen("dados/avaliacoes.json", "w");
@@ -368,7 +371,7 @@ int salvarAvaliacoes(void)
     return 1;
 }
 
-
+// Atualiza a quantidade e a média das avaliações de cada agente.
 void calcularMediasAvaliacoes(void)
 {
     int i, j;
@@ -403,6 +406,7 @@ void calcularMediasAvaliacoes(void)
     }
 }
 
+// Registra uma nota para o agente indicado pelo índice e persiste os dados.
 int registrarAvaliacao(int indiceAgente, int nota)
 {
     if (indiceAgente < 0 || indiceAgente >= quantidadeAgentes)
