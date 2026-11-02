@@ -21,7 +21,7 @@ Estado: S1 encerrada após publicação deste documento; S2 ainda não implement
 4. Eliminar histórico individual de notas e limite global `MAX_AVALIACOES=1000`; a contagem será por agente. Ao excluir o agente, eliminar também seus agregados de avaliações.
 5. Trocar inativação (status 0/1) por exclusão física. Ao excluir, deslocar **todos os vetores paralelos relacionados** para manter os campos alinhados, sem renumerar IDs dos demais agentes.
 6. Próximo ID por `maior ID existente + 1` (ou 1 se não houver agentes). IDs dos agentes ativos no arquivo devem ser únicos. Se o maior ID anterior foi excluído, seu número poderá ser reutilizado; a unicidade aqui é dos registros existentes, não histórica.
-7. Carregar JSON no início; trabalhar nos vetores globais na RAM; reduzir escritas repetidas no arquivo. **Proposta do proprietário, ainda em análise:** quando o usuário escolher `-1` em qualquer menu ou `0` no menu principal, perguntar se deseja salvar as alterações antes de encerrar. Avaliar se melhor UX é `Salvar e sair / Sair sem salvar / Cancelar`, sobretudo se houver mudanças pendentes. **Não implementar uma segunda rotina de salvamento redundante nem presumir salvamento automático sem aprovação.**
+7. Carregar JSON no início; trabalhar nos vetores globais na RAM; reduzir escritas repetidas no arquivo. **APROVADO PELO PROPRIETÁRIO:** quando o usuário escolher `-1` em qualquer menu ou `0` no menu principal, se houver alterações pendentes perguntar: `1 — Salvar e sair`, `2 — Sair sem salvar`, `0 — Cancelar e voltar ao programa`. Se não houver alterações pendentes, encerrar sem perguntar. Se salvar falhar, não afirmar sucesso nem encerrar como se tivesse salvo. Uma única rotina de gravação do JSON; sem salvamento automático durante cada operação.
 8. Criar headers por responsabilidades/módulos, evitando header monolítico, mas cada `.c` pode incluir outros headers necessários; não criar `main.h` artificial.
 9. Preservar o comportamento do catálogo, operações administrativas e tratamento de entrada, adaptando o necessário ao novo escopo.
 
@@ -38,7 +38,7 @@ Estado: S1 encerrada após publicação deste documento; S2 ainda não implement
 - A apresentação usa `%.1f`; o valor persistido não deve ser limitado artificialmente a uma casa decimal só porque a exibição é assim.
 - Não migrar as três avaliações históricas; zerar todos os contadores e definir média como `null` na versão nova.
 - Após implementar, executar rodada de avaliação **no console do VS Code**, avaliando **cada um dos 20 agentes ao menos três vezes** (mínimo 60 avaliações). Esse ensaio será executado e verificado, não declarado como concluído antecipadamente.
-- Fluxo de saída ainda não aprovado: proprietário sugeriu perguntar se deseja salvar ao pressionar `-1` ou `0` no menu principal.
+- Fluxo de saída **APROVADO**: se existirem alterações pendentes, `1 — Salvar e sair`, `2 — Sair sem salvar`, `0 — Cancelar e voltar ao programa`, acionado por `-1` ou `0` no menu principal. Sem alterações pendentes, encerrar diretamente.
 - Prioridade: concluir implementação, testes e documentação **em 02/11/2026**, com verificações reais; cronograma abaixo é histórico e está sendo replanejado para hoje.
 
 ## Cronograma e critérios
