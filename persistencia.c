@@ -8,78 +8,65 @@
 // Carrega UMA VEZ o agentes.json para os vetores paralelos na RAM.
 // O leitor espera o formato simples que salvarAgentes produz, uma chave por linha.
 // Devolve 1 em sucesso e 0 se encontrar arquivo incompleto ou dados invalidos.
+
+
 int carregarAgentes(void)
 {
-    FILE *arquivo = fopen("dados/agentes.json", "r");
-    char linha[1400];
-    int indice = 0, id, quantidade, fim = 0, valido = 1, semMedia = 0;
-    double media = 0.0;
-    char nome[MAX_NOME], descricao[MAX_DESCRICAO];
-    char categoria[MAX_CATEGORIA], instrucoes[MAX_INSTRUCOES];
-    if (arquivo == NULL)
+    FILE *arquivo;
+    char marcador = 0;
+    char fechamento;
+    char nota[40];
+    int leitura;
+    int camposLidos;
+    int indiceAgente = 0;
+
+    arquivo = fopen("dados/agentes.json", "r");
+    if (arquivo == NULL) { return 0; }
+
+    leitura = fscanf(arquivo, " %c", &marcador);
+
+    if (leitura != 1 || marcador != '[')
     {
-        printf("Erro: dados/agentes.json nao encontrado.\n");
+        fclose(arquivo);
         return 0;
     }
-    if (fgets(linha, sizeof(linha), arquivo) == NULL || strchr(linha, '[') == NULL)
-        valido = 0;
 
-    while (valido && fgets(linha, sizeof(linha), arquivo) != NULL)
+    while (1)
     {
-        if (strchr(linha, ']') != NULL) { fim = 1; break; }
-        if (indice >= MAX_AGENTES || strchr(linha, '{') == NULL) { valido = 0; break; }
+        leitura = fscanf(arquivo, " %c", &marcador);
 
-        if (fgets(linha, sizeof(linha), arquivo) == NULL ||
-            sscanf(linha, " \"id\": %d", &id) != 1 || id < 1 || id > 999999)
-        { valido = 0; break; }
-        for (int j = 0; j < indice; j++)
-            if (idsAgentes[j] == id) valido = 0;
-        if (!valido) break;
+        if (leitura != 1 || marcador == ']') { break; }
+        if (marcador == ',') { continue; }
+        if (marcador != '{' || indiceAgente >= MAX_AGENTES) { break; }
 
-        if (fgets(linha, sizeof(linha), arquivo) == NULL ||
-            sscanf(linha, " \"nome\": \"%80[^\"]\"", nome) != 1 ||
-            fgets(linha, sizeof(linha), arquivo) == NULL ||
-            sscanf(linha, " \"descricao\": \"%1000[^\"]\"", descricao) != 1 ||
-            fgets(linha, sizeof(linha), arquivo) == NULL ||
-            sscanf(linha, " \"categoria\": \"%50[^\"]\"", categoria) != 1 ||
-            fgets(linha, sizeof(linha), arquivo) == NULL ||
-            sscanf(linha, " \"instrucoes\": \"%1000[^\"]\"", instrucoes) != 1)
-        { valido = 0; break; }
+        camposLidos = fscanf(arquivo,
+            " \"id\": %d,"
+            " \"nome\": \"%80[^\"]\","
+            " \"descricao\": \"%1000[^\"]\","
+            " \"categoria\": \"%50[^\"]\","
+            " \"instrucoes\": \"%1000[^\"]\","
+            " \"notaMedia\": %39[^,],"
+            " \"quantidadeAvaliacoes\": %d %c",
+            &idsAgentes[indiceAgente],
+            nomesAgentes[indiceAgente],
+            descricaoAgentes[indiceAgente],
+            categoriasAgentes[indiceAgente],
+            instrucoesAgentes[indiceAgente],
+            nota,&quantidadesAvaliacoesAgentes[indiceAgente],&fechamento);
 
-        if (fgets(linha, sizeof(linha), arquivo) == NULL) { valido = 0; break; }
-        semMedia = (strstr(linha, "\"notaMedia\": null") != NULL);
-        if (semMedia) { media = 0.0; quantidade = 0; }
-        else if (sscanf(linha, " \"notaMedia\": %lf", &media) != 1 ||
-                 !(media >= 0.0 && media <= 5.0))
-        { valido = 0; break; }
-        else quantidade = -1; // Sera lida na linha seguinte.
+        if (camposLidos != 8 || fechamento != '}') { break; }
 
-        if (fgets(linha, sizeof(linha), arquivo) == NULL ||
-            sscanf(linha, " \"quantidadeAvaliacoes\": %d", &quantidade) != 1 || quantidade < 0)
-        { valido = 0; break; }
-        if ((quantidade == 0 && !semMedia) || (quantidade > 0 && semMedia))
-        { valido = 0; break; }
-        if (fgets(linha, sizeof(linha), arquivo) == NULL || strchr(linha, '}') == NULL)
-        { valido = 0; break; }
+        mediasAgentes[indiceAgente] = 0.0;
+        sscanf(nota, "%lf", &mediasAgentes[indiceAgente]);
 
-        idsAgentes[indice] = id;
-        strcpy(nomesAgentes[indice], nome);
-        strcpy(descricaoAgentes[indice], descricao);
-        strcpy(categoriasAgentes[indice], categoria);
-        strcpy(instrucoesAgentes[indice], instrucoes);
-        mediasAgentes[indice] = media;
-        quantidadesAvaliacoesAgentes[indice] = quantidade;
-        indice++;
+        indiceAgente++;
     }
-    if (ferror(arquivo) || !fim) valido = 0;
-    if (fclose(arquivo) == EOF) valido = 0;
-    if (!valido)
-    {
-        quantidadeAgentes = 0;
-        printf("Erro: formato invalido em dados/agentes.json.\n");
-        return 0;
-    }
-    quantidadeAgentes = indice;
+
+    fclose(arquivo);
+
+    if (marcador != ']') { return 0; }
+
+    quantidadeAgentes = indiceAgente;
     alteracoesPendentes = 0;
     return 1;
 }
