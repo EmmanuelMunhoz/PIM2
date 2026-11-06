@@ -1,342 +1,132 @@
-#include <stdio.h>    // Entrada e saida de dados, como printf().
-#include <string.h>   // Manipulacao de strings, como strcmp().
-#include <stdlib.h>   // Funcoes utilitarias do C (nao utilizada diretamente aqui).
-#include "functions.h" // Declaracoes das funcoes compartilhadas entre arquivos.
+#include <stdio.h>
+#include <string.h>
+#include "cadastro.h"
+#include "dados.h"
+#include "entrada.h"
 
-// Solicita os dados de um agente, atribui seu ID e tenta salvá-los.
+// Confere se o texto pode ser escrito pelo gravador JSON simplificado.
+// Como nao ha biblioteca externa, aspas, barras e controles sao rejeitados.
+int textoValido(const char texto[])
+{
+    if (texto[0] == '\0') return 0;
+    for (int i = 0; texto[i] != '\0'; i++)
+        if (texto[i] == '"' || texto[i] == '\\' || (unsigned char)texto[i] < 32) return 0;
+    return 1;
+}
+
+// Pede um campo obrigatorio; retorna 1=texto valido, 0=cancelado, -1=EOF.
+int pedirCampo(char destino[], int capacidade, const char rotulo[])
+{
+    int retorno;
+    printf("%s", rotulo);
+    retorno = lerEntrada(destino, capacidade);
+    if (retorno == -1) return -1;
+    if (retorno != 1 || !textoValido(destino))
+    { printf("Campo vazio ou com caracteres invalidos (aspas/barra invertida).\n"); return 0; }
+    return 1;
+}
+
+// Cadastra agente na proxima posicao disponivel, sem salvar em disco.
+// O ID e maiorID+1; nao se utiliza quantidade+1 nem controle.json.
 void cadastrarAgente(void)
 {
-    int indiceAgente = quantidadeAgentes;
-    int retornoLeitura;
-
-    if(quantidadeAgentes >= MAX_AGENTES)
-    {
-        printf("Não pode ser cadastrado mais AGENTES\n");
-        return;
-    }
-    if (proximoIdAgente <= 0)
-    {
-        printf("Nao ha IDs disponiveis para novos agentes.\n");
-        return;
-    }
-
-    printf("\nNome do Agente: ");retornoLeitura = lerEntrada(nomesAgentes[indiceAgente],sizeof(nomesAgentes[indiceAgente]));
-
-    if(retornoLeitura != 1)
-    {
-        return;
-    }
-
-    if (nomesAgentes[indiceAgente][0] == '\0')
-    {
-        printf("Nome obrigatorio!\n");
-        return;
-    }
-
-    printf("\nQual a descrição do AGENTE: ");retornoLeitura = lerEntrada(descricaoAgentes[indiceAgente],sizeof(descricaoAgentes[indiceAgente]));
-
-    if(retornoLeitura != 1)
-    {
-
-        return;
-    }
-
-    if (descricaoAgentes[indiceAgente][0] == '\0')
-    {
-        printf("Descrição obrigatoria!\n");
-        return;
-    }
-
-    printf("\nQual a categoria do Agente: ");retornoLeitura = lerEntrada(categoriasAgentes[indiceAgente],sizeof(categoriasAgentes[indiceAgente]));
-
-    if(retornoLeitura != 1)
-    {
-
-        return;
-    }
-
-    if (categoriasAgentes[indiceAgente][0] == '\0')
-    {
-        printf("Categoria obrigatoria!\n");
-        return;
-    }
-
-    printf("\nQual a instrução do AGENTE: ");retornoLeitura = lerEntrada(instrucoesAgentes[indiceAgente],sizeof(instrucoesAgentes[indiceAgente]));
-
-    if(retornoLeitura != 1)
-    {
-
-        return;
-    }
-
-    if (instrucoesAgentes[indiceAgente][0] == '\0')
-    {
-        printf("Intruções obrigatorias!\n");
-        return;
-    }
-
-    // As aspas e barras invertidas exigiriam tratamento especial no JSON.
-    // Nesta versao simples, esses caracteres nao sao aceitos no cadastro.
-    if (strchr(nomesAgentes[indiceAgente], '"') != NULL ||
-        strchr(nomesAgentes[indiceAgente], '\\') != NULL ||
-        strchr(descricaoAgentes[indiceAgente], '"') != NULL ||
-        strchr(descricaoAgentes[indiceAgente], '\\') != NULL ||
-        strchr(categoriasAgentes[indiceAgente], '"') != NULL ||
-        strchr(categoriasAgentes[indiceAgente], '\\') != NULL ||
-        strchr(instrucoesAgentes[indiceAgente], '"') != NULL ||
-        strchr(instrucoesAgentes[indiceAgente], '\\') != NULL)
-    {
-        printf("Nao use aspas ou barra invertida nos campos do agente.\n");
-        return;
-    }
-
-    idsAgentes[indiceAgente] = proximoIdAgente;
-    statusAgentes[indiceAgente] = 1;
-    mediasAgentes[indiceAgente] = 0.0;
-    quantidadesAvaliacoesAgentes[indiceAgente] = 0;
-    possuiMediaAgentes[indiceAgente] = 0;
+    int indice = quantidadeAgentes, maior = 0;
+    if (quantidadeAgentes >= MAX_AGENTES)
+    { printf("Capacidade de %d agentes atingida.\n", MAX_AGENTES); return; }
+    for (int i = 0; i < quantidadeAgentes; i++)
+        if (idsAgentes[i] > maior) maior = idsAgentes[i];
+    if (maior >= 999999) { printf("Limite de identificadores atingido.\n"); return; }
+    if (pedirCampo(nomesAgentes[indice], MAX_NOME, "Nome: ") != 1 ||
+        pedirCampo(descricaoAgentes[indice], MAX_DESCRICAO, "Descricao: ") != 1 ||
+        pedirCampo(categoriasAgentes[indice], MAX_CATEGORIA, "Categoria: ") != 1 ||
+        pedirCampo(instrucoesAgentes[indice], MAX_INSTRUCOES, "Instrucoes: ") != 1)
+    { printf("Cadastro cancelado.\n"); return; }
+    idsAgentes[indice] = maior + 1;
+    mediasAgentes[indice] = 0.0;
+    quantidadesAvaliacoesAgentes[indice] = 0;
     quantidadeAgentes++;
-    proximoIdAgente++;
+    alteracoesPendentes = 1;
+    printf("Agente ID %d cadastrado na memoria. Salve ao sair!\n", idsAgentes[indice]);
+}
 
-    if (salvarAgentes() == 1)
+// Edita nome, descricao, categoria ou instrucoes do agente na RAM.
+// -1 solicita saida; 1 volta a ficha; 0 indica indice invalido.
+int editarAgente(int indiceAgente)
+{
+    char entrada[TAM], novoTexto[MAX_DESCRICAO];
+    int opcao, retorno, capacidade;
+    char *destino;
+    if (indiceAgente < 0 || indiceAgente >= quantidadeAgentes) return 0;
+    for (;;)
     {
-        if (salvarControle() == 1)
+        printf("\n=== EDITAR: %s (ID %d) ===\n", nomesAgentes[indiceAgente], idsAgentes[indiceAgente]);
+        printf("[1] Nome\n");
+        printf("[2] Descricao\n");
+        printf("[3] Categoria\n");
+        printf("[4] Instrucoes\n");
+        printf("[0] Voltar\n");
+        printf("[-1] Encerrar\n");
+        printf("Opcao: ");
+        retorno = lerEntrada(entrada, sizeof(entrada));
+        if (retorno == -1) return -1;
+        if (retorno != 1) continue;
+        opcao = validarEntrada(entrada, 4);
+        if (opcao == -1) return -1;
+        if (opcao == 0) return 1;
+        destino = NULL;
+        capacidade = 0;
+        switch (opcao)
         {
-            printf("\033[32m\nAgente salvo com sucesso!\033[0m");
-            printf("\033[32m\nControle atualizado!\033[0m");
+            case 1:
+                destino = nomesAgentes[indiceAgente];
+                capacidade = MAX_NOME;
+                break;
+            case 2:
+                destino = descricaoAgentes[indiceAgente];
+                capacidade = MAX_DESCRICAO;
+                break;
+            case 3:
+                destino = categoriasAgentes[indiceAgente];
+                capacidade = MAX_CATEGORIA;
+                break;
+            case 4:
+                destino = instrucoesAgentes[indiceAgente];
+                capacidade = MAX_INSTRUCOES;
+                break;
+            default:
+                break;
         }
-        else
+        if (destino == NULL) { printf("Opcao invalida.\n"); continue; }
+        printf("Novo texto: ");
+        retorno = lerEntrada(novoTexto, capacidade);
+        if (retorno == -1) return -1;
+        if (retorno != 1 || !textoValido(novoTexto)) { printf("Texto invalido.\n"); continue; }
+        if (strcmp(novoTexto, "-1") == 0) return -1;
+        if (strcmp(destino, novoTexto) != 0)
         {
-            quantidadeAgentes--;
-            proximoIdAgente--;
-            if (salvarAgentes() == 1)
-            {
-                printf("Cadastro desfeito porque controle.json nao foi salvo.\n");
-            }
-            else
-            {
-                quantidadeAgentes++;
-                proximoIdAgente++;
-                printf("Falha ao salvar controle e ao desfazer agentes.json. Verifique os arquivos.\n");
-            }
+            strcpy(destino, novoTexto);
+            alteracoesPendentes = 1;
+            printf("Alteracao registrada na RAM.\n");
         }
-    }
-    else
-    {
-        quantidadeAgentes--;
-        proximoIdAgente--;
-        printf("Erro ao salvar agente!\n");
     }
 }
 
-// Edita os campos do agente na posição indicada, incluindo seu status.
-int editarAgente(int indiceAgente)
+// Remove FISICAMENTE o agente e seus totais, deslocando TODOS os vetores.
+// IDs dos agentes restantes nao sao modificados; a quantidade diminui.
+int excluirAgente(int indiceAgente)
 {
-    int escolha, leituraOk, capacidade;
-    int statusAnterior, novoStatus;
-    char entrada[TAM];
-    char novoTexto[MAX_DESCRICAO];
-    char textoAnterior[MAX_DESCRICAO];
-    char *campo = NULL;
-
-    if (indiceAgente < 0 || indiceAgente >= quantidadeAgentes)
+    if (indiceAgente < 0 || indiceAgente >= quantidadeAgentes) return 0;
+    for (int i = indiceAgente; i < quantidadeAgentes - 1; i++)
     {
-        printf("\nAgente invalido!\n");
-        return 0;
+        idsAgentes[i] = idsAgentes[i+1];
+        strcpy(nomesAgentes[i], nomesAgentes[i+1]);
+        strcpy(descricaoAgentes[i], descricaoAgentes[i+1]);
+        strcpy(categoriasAgentes[i], categoriasAgentes[i+1]);
+        strcpy(instrucoesAgentes[i], instrucoesAgentes[i+1]);
+        mediasAgentes[i] = mediasAgentes[i+1];
+        quantidadesAvaliacoesAgentes[i] = quantidadesAvaliacoesAgentes[i+1];
     }
-
-    do
-    {
-        printf("\n========== EDITAR AGENTE ==========\n\n");
-        printf("ID: %d\n",idsAgentes[indiceAgente]);
-        printf("Nome: %s\n",nomesAgentes[indiceAgente]);
-        printf("Descricao: %s\n",descricaoAgentes[indiceAgente]);
-        printf("Categoria: %s\n",categoriasAgentes[indiceAgente]);
-        printf("Instrucoes: %s\n",instrucoesAgentes[indiceAgente]);
-        printf("Status: %s\n",statusAgentes[indiceAgente] == 1 ? "ATIVO" : "INATIVO");
-
-        printf("\n[1] Alterar nome");
-        printf("\n[2] Alterar descricao");
-        printf("\n[3] Alterar categoria");
-        printf("\n[4] Alterar instrucoes");
-        printf("\n[5] Alterar status");
-        printf("\n[0] Voltar a ficha");
-        printf("\n[-1] Encerrar o sistema");
-        printf("\n\nEscolha uma opcao: ");
-
-        leituraOk = lerEntrada(entrada,sizeof(entrada));
-
-        if (leituraOk == -1)
-        {
-            return -1;
-        }
-
-        if (leituraOk != 1)
-        {
-            printf("\nEntrada invalida!\n");
-            continue;
-        }
-
-        escolha = validarEntrada(entrada,5);
-
-        if (escolha == -1)
-        {
-            return -1;
-        }
-
-        if (escolha == 0)
-        {
-            return 0;
-        }
-
-        if (escolha < 1 || escolha > 5)
-        {
-            printf("\nOpcao invalida!\n");
-            continue;
-        }
-
-        if (escolha == 5)
-        {
-            printf("\n[1] Ativar agente");
-            printf("\n[0] Inativar agente");
-            printf("\n[-1] Encerrar o sistema");
-            printf("\n\nNovo status: ");
-
-            leituraOk = lerEntrada(entrada,sizeof(entrada));
-
-            if (leituraOk == -1)
-            {
-                return -1;
-            }
-
-            if (leituraOk != 1)
-            {
-                printf("\nEntrada invalida!\n");
-                continue;
-            }
-
-            novoStatus = validarEntrada(entrada,1);
-
-            if (novoStatus == -1)
-            {
-                return -1;
-            }
-
-            if (novoStatus != 0 && novoStatus != 1)
-            {
-                printf("\nStatus invalido!\n");
-                continue;
-            }
-
-            statusAnterior = statusAgentes[indiceAgente];
-            statusAgentes[indiceAgente] = novoStatus;
-
-            if (salvarAgentes() == 1)
-            {
-                printf("\nStatus atualizado com sucesso!\n");
-            }
-            else
-            {
-                statusAgentes[indiceAgente] = statusAnterior;
-                printf("\nFalha ao salvar. Estado anterior restaurado na memoria.\n");
-                printf("Verifique agentes.json antes de continuar.\n");
-                return 0;
-            }
-
-            continue;
-        }
-
-        campo = NULL;
-        capacidade = 0;
-
-        switch (escolha)
-        {
-            case 1:
-                campo = nomesAgentes[indiceAgente];
-                capacidade = MAX_NOME;
-                printf("\nNovo nome: ");
-                break;
-
-            case 2:
-                campo = descricaoAgentes[indiceAgente];
-                capacidade = MAX_DESCRICAO;
-                printf("\nNova descricao: ");
-                break;
-
-            case 3:
-                campo = categoriasAgentes[indiceAgente];
-                capacidade = MAX_CATEGORIA;
-                printf("\nNova categoria: ");
-                break;
-
-            case 4:
-                campo = instrucoesAgentes[indiceAgente];
-                capacidade = MAX_INSTRUCOES;
-                printf("\nNovas instrucoes: ");
-                break;
-        }
-
-        if (campo == NULL)
-        {
-            continue;
-        }
-
-        leituraOk = lerEntrada(novoTexto,capacidade);
-
-        if (leituraOk == -1)
-        {
-            return -1;
-        }
-
-        if (leituraOk != 1)
-        {
-            printf("\nAlteracao cancelada: entrada invalida.\n");
-            continue;
-        }
-
-        if (strcmp(novoTexto,"-1") == 0)
-        {
-            return -1;
-        }
-
-        if (novoTexto[0] == '\0')
-        {
-            printf("\nO campo nao pode ficar vazio!\n");
-            continue;
-        }
-
-        int caractereInvalido = 0;
-
-        for (int i = 0; novoTexto[i] != '\0'; i++)
-        {
-            if (novoTexto[i] == '"' || novoTexto[i] == '\\' ||
-                (unsigned char)novoTexto[i] < 32)
-            {
-                caractereInvalido = 1;
-                break;
-            }
-        }
-
-        if (caractereInvalido == 1)
-        {
-            printf("\nTexto contem caracteres nao permitidos no JSON.\n");
-            continue;
-        }
-
-        strcpy(textoAnterior,campo);
-        strcpy(campo,novoTexto);
-
-        if (salvarAgentes() == 1)
-        {
-            printf("\nInformacao atualizada com sucesso!\n");
-        }
-        else
-        {
-            strcpy(campo,textoAnterior);
-            printf("\nFalha ao salvar. Valor anterior restaurado na memoria.\n");
-            printf("Verifique agentes.json antes de continuar.\n");
-            return 0;
-        }
-
-    } while (1);
+    quantidadeAgentes--;
+    alteracoesPendentes = 1;
+    return 1;
 }

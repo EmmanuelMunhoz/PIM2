@@ -1,546 +1,230 @@
 #include <stdio.h>
 #include <string.h>
-#include "functions.h"
+#include "consultas.h"
+#include "entrada.h"
+#include "dados.h"
+#include "cadastro.h"
+#include "persistencia.h"
 
-// Exibe agentes ativos, suas fichas públicas e permite registrar avaliações.
+// Exibe catalogo publico e permite abrir fichas de agentes existentes.
 int catalogoAgentes(void)
 {
-    int i;
-    int numeroExibicao;
-    int escolha, leituraMenuOk;
     char entrada[TAM];
-
-    do
+    int escolha, leitura;
+    for (;;)
     {
-        numeroExibicao = 0;
-        int posicoesAgentes[50];
-
-        printf("\n========== CATALOGO DE AGENTES ==========\n\n");
-
-        for (i = 0; i < quantidadeAgentes; i++)
+        printf("\n========== CATALOGO DE AGENTES ==========\n");
+        for (int i = 0; i < quantidadeAgentes; i++)
         {
-            if (statusAgentes[i] == 1)
+            printf("[%d] ID %d - %s - %s - ", i+1, idsAgentes[i], nomesAgentes[i], categoriasAgentes[i]);
+            if (quantidadesAvaliacoesAgentes[i] == 0) printf("Sem avaliacoes\n");
+            else printf("Media: %.1f (%d avaliacoes)\n", mediasAgentes[i], quantidadesAvaliacoesAgentes[i]);
+        }
+        if (quantidadeAgentes == 0) printf("Nenhum agente cadastrado.\n");
+        printf("\n[0] Voltar\n");
+        printf("[-1] Encerrar\n");
+        printf("Escolha um agente: ");
+        leitura = lerEntrada(entrada, sizeof(entrada));
+        if (leitura == -1) return -1;
+        if (leitura != 1) continue;
+        escolha = validarEntrada(entrada, quantidadeAgentes);
+        if (escolha == -1) return -1;
+        if (escolha == 0) return 0;
+        if (escolha < 1) { printf("Opcao invalida.\n"); continue; }
+        int indice = escolha - 1;
+        for (;;)
+        {
+            printf("\n========== FICHA PUBLICA ==========\n");
+            printf("ID: %d\n", idsAgentes[indice]);
+            printf("Nome: %s\n", nomesAgentes[indice]);
+            printf("Categoria: %s\n", categoriasAgentes[indice]);
+            printf("Descricao: %s\n", descricaoAgentes[indice]);
+            printf("Instrucoes: %s\n", instrucoesAgentes[indice]);
+            if (quantidadesAvaliacoesAgentes[indice] == 0) printf("Nota media: Sem avaliacoes\n");
+            else printf("Nota media: %.1f | Avaliacoes: %d\n", mediasAgentes[indice], quantidadesAvaliacoesAgentes[indice]);
+            printf("\n[1] Avaliar agente\n");
+            printf("[0] Voltar\n");
+            printf("[-1] Encerrar\n");
+            printf("Opcao: ");
+            leitura = lerEntrada(entrada, sizeof(entrada));
+            if (leitura == -1) return -1;
+            if (leitura != 1) continue;
+            escolha = validarEntrada(entrada, 1);
+            if (escolha == -1) return -1;
+            if (escolha == 0) break;
+            if (escolha != 1) { printf("Opcao invalida.\n"); continue; }
+            printf("Nota de 0 a 5 (ou -1 para encerrar): ");
+            leitura = lerEntrada(entrada, sizeof(entrada));
+            if (leitura == -1) return -1;
+            if (leitura != 1) continue;
+            int nota = validarEntrada(entrada, 5);
+            if (nota == -1) return -1;
+            if (nota < 0) { printf("Nota invalida.\n"); continue; }
+            printf("\nNota: %d\n", nota);
+            printf("[1] Confirmar\n");
+            printf("[0] Cancelar\n");
+            printf("[-1] Encerrar\n");
+            printf("Opcao: ");
+            leitura = lerEntrada(entrada, sizeof(entrada));
+            if (leitura == -1) return -1;
+            if (leitura != 1) continue;
+            int confirmar = validarEntrada(entrada, 1);
+            switch (confirmar)
             {
-                posicoesAgentes[numeroExibicao] = i;
-                numeroExibicao++;
-
-                printf("[%d] %s - %s - ",numeroExibicao,nomesAgentes[i],categoriasAgentes[i]);
-
-                if (possuiMediaAgentes[i] == 1)
-                {
-                    printf("Nota: %.1f\n",mediasAgentes[i]);
-                }
-                else
-                {
-                    printf("Sem avaliacoes\n");
-                }
+                case -1:
+                    return -1;
+                case 0:
+                    printf("Avaliacao cancelada.\n");
+                    break;
+                case 1:
+                    if (registrarAvaliacao(indice, nota))
+                        printf("Avaliacao registrada na RAM. Salve ao encerrar!\n");
+                    else printf("Falha ao registrar avaliacao.\n");
+                    break;
+                default:
+                    printf("Opcao invalida: avaliacao cancelada.\n");
+                    break;
             }
         }
-
-        if (numeroExibicao == 0)
-        {
-            printf("Nenhum agente ativo disponivel.\n");
-        }
-
-        printf("\n[0] Voltar ao menu principal");
-        printf("\n[-1] Sair do sistema");
-        printf("\n\nQual opcao voce deseja escolher: ");
-
-        leituraMenuOk = lerEntrada(entrada,sizeof(entrada));
-
-        if (leituraMenuOk == -1)
-        {
-            return -1;
-        }
-
-        if (leituraMenuOk == 0)
-        {
-            printf("\nEntrada invalida!\n");
-            continue;
-        }
-
-        escolha = validarEntrada(entrada,50);
-
-        if (escolha == 0)
-        {
-            return 0;
-        }
-
-        if (escolha == -1)
-        {
-            return -1;
-        }
-
-        if (escolha >= 1 && escolha <= numeroExibicao)
-        {
-            int indiceAgente = posicoesAgentes[escolha - 1];
-            int escolhaFicha, leituraFichaOk;
-            char entradaFicha[TAM];
-
-            do
-            {
-                printf("\n========== FICHA DO AGENTE ==========\n\n");
-                printf("Nome: %s\n",nomesAgentes[indiceAgente]);
-                printf("Categoria: %s\n",categoriasAgentes[indiceAgente]);
-                printf("Descricao: %s\n",descricaoAgentes[indiceAgente]);
-                printf("Instrucoes: %s\n",instrucoesAgentes[indiceAgente]);
-
-                if (possuiMediaAgentes[indiceAgente] == 1)
-                {
-                    printf("Nota media: %.1f\n",mediasAgentes[indiceAgente]);
-                }
-                else
-                {
-                    printf("Nota media: Sem avaliacoes\n");
-                }
-
-                printf("\n[1] Avaliar agente");
-                printf("\n[2] Voltar ao catalogo");
-                printf("\n[-1] Encerrar o sistema");
-                printf("\n\nEscolha uma opcao: ");
-
-                leituraFichaOk = lerEntrada(entradaFicha,sizeof(entradaFicha));
-
-                if (leituraFichaOk == -1)
-                {
-                    return -1;
-                }
-
-                if (leituraFichaOk == 0)
-                {
-                    printf("\nEntrada invalida!\n");
-                    continue;
-                }
-
-                escolhaFicha = validarEntrada(entradaFicha,2);
-
-                if (escolhaFicha == -1)
-                {
-                    return -1;
-                }
-
-                if (escolhaFicha == 2)
-                {
-                    break;
-                }
-
-                if (escolhaFicha == 1)
-                {
-                    int nota, escolhaConfirmacao, leituraNotaOk, leituraConfirmacaoOk;
-                    char entradaNota[TAM], entradaConfirmacao[TAM];
-
-                    do
-                    {
-                        printf("\n========== AVALIAR AGENTE ==========\n");
-                        printf("\nAgente: %s\n",nomesAgentes[indiceAgente]);
-                        printf("Digite uma nota de 0 a 5: ");
-
-                        leituraNotaOk = lerEntrada(entradaNota,sizeof(entradaNota));
-
-                        if (leituraNotaOk == -1)
-                        {
-                            return -1;
-                        }
-
-                        if (leituraNotaOk == 0)
-                        {
-                            printf("\nEntrada invalida!\n");
-                            continue;
-                        }
-
-                        nota = validarEntrada(entradaNota,5);
-
-                        if (nota == -1)
-                        {
-                            return -1;
-                        }
-
-                        if (nota == -2)
-                        {
-                            printf("\nNota invalida! Digite um numero de 0 a 5.\n");
-                            continue;
-                        }
-
-                        do
-                        {
-                            printf("\nNota escolhida: %d\n",nota);
-                            printf("\n[1] Confirmar avaliacao");
-                            printf("\n[2] Alterar nota");
-                            printf("\n[0] Cancelar avaliacao");
-                            printf("\n[-1] Encerrar o sistema");
-                            printf("\n\nEscolha uma opcao: ");
-
-                            leituraConfirmacaoOk = lerEntrada(entradaConfirmacao,sizeof(entradaConfirmacao));
-
-                            if (leituraConfirmacaoOk == -1)
-                            {
-                                return -1;
-                            }
-
-                            if (leituraConfirmacaoOk == 0)
-                            {
-                                printf("\nEntrada invalida!\n");
-                                continue;
-                            }
-
-                            escolhaConfirmacao = validarEntrada(entradaConfirmacao,2);
-
-                            if (escolhaConfirmacao == -1)
-                            {
-                                return -1;
-                            }
-
-                            if (escolhaConfirmacao == 1)
-                            {
-                                if (registrarAvaliacao(indiceAgente,nota) == 1)
-                                {
-                                    printf("\nAvaliacao salva com sucesso!\n");
-                                }
-                                else
-                                {
-                                    printf("\nNao foi possivel salvar a avaliacao.\n");
-                                }
-                                break;
-                            }
-
-                            if (escolhaConfirmacao == 2)
-                            {
-                                break;
-                            }
-
-                            if (escolhaConfirmacao == 0)
-                            {
-                                printf("\nAvaliacao cancelada.\n");
-                                break;
-                            }
-
-                            printf("\nOpcao invalida!\n");
-
-                        } while (1);
-
-                        if (escolhaConfirmacao == 2)
-                        {
-                            continue;
-                        }
-
-                        break;
-
-                    } while (1);
-
-                    continue;
-                }
-
-
-                printf("\nOpcao invalida!\n");
-
-            } while (1);
-
-            continue;
-        }
-        printf("\nOpcao ainda nao implementada ou invalida.\n");
-    } while (1);
+    }
 }
 
-// Lista todos os agentes e permite abrir a ficha pela posição exibida.
+// Lista os agentes no painel administrativo; a escolha abre uma ficha.
 int listarAgentesAdm(void)
 {
-    int i, escolha, leituraOk;
     char entrada[TAM];
-
-    do
+    int leitura, escolha;
+    for (;;)
     {
-        printf("\n========== LISTAGEM ADMINISTRATIVA ==========\n\n");
-
-        for (i = 0; i < quantidadeAgentes; i++)
+        printf("\n========== LISTAGEM ADMINISTRATIVA ==========\n");
+        for (int i = 0; i < quantidadeAgentes; i++)
         {
-            printf("[%d] %s - %s - ",i + 1,nomesAgentes[i],categoriasAgentes[i]);
-
-            if (possuiMediaAgentes[i] == 1)
-            {
-                printf("Nota: %.1f - ",mediasAgentes[i]);
-            }
-            else
-            {
-                printf("Sem avaliacoes - ");
-            }
-
-            if (statusAgentes[i] == 1)
-            {
-                printf("ATIVO\n");
-            }
-            else
-            {
-                printf("INATIVO\n");
-            }
+            printf("[%d] ID %d - %s - %s - ", i+1, idsAgentes[i], nomesAgentes[i], categoriasAgentes[i]);
+            if (quantidadesAvaliacoesAgentes[i] == 0) printf("Sem avaliacoes\n");
+            else printf("Nota: %.1f (%d)\n", mediasAgentes[i], quantidadesAvaliacoesAgentes[i]);
         }
-
-        if (quantidadeAgentes == 0)
-        {
-            printf("Nenhum agente cadastrado.\n");
-        }
-
-        printf("\n[0] Voltar ao painel administrativo");
-        printf("\n[-1] Encerrar o sistema");
-        printf("\n\nEscolha uma opcao: ");
-
-        leituraOk = lerEntrada(entrada,sizeof(entrada));
-
-        if (leituraOk == -1)
-        {
-            return -1;
-        }
-
-        if (leituraOk == 0)
-        {
-            printf("\nEntrada invalida!\n");
-            continue;
-        }
-
-        escolha = validarEntrada(entrada,MAX_AGENTES);
-
-        if (escolha == -1)
-        {
-            return -1;
-        }
-
-        if (escolha == 0)
-        {
-            return 0;
-        }
-
-        if (escolha >= 1 && escolha <= quantidadeAgentes)
-        {
-            int indiceAgente = escolha - 1;
-
-            if (fichaAgenteAdm(indiceAgente) == -1)
-            {
-                return -1;
-            }
-
-            continue;
-        }
-
-        printf("\nOpcao invalida!\n");
-
-    } while (1);
+        if (quantidadeAgentes == 0) printf("Nenhum agente cadastrado.\n");
+        printf("[0] Voltar\n");
+        printf("[-1] Encerrar\n");
+        printf("Escolha: ");
+        leitura = lerEntrada(entrada, sizeof(entrada));
+        if (leitura == -1) return -1;
+        if (leitura != 1) continue;
+        escolha = validarEntrada(entrada, quantidadeAgentes);
+        if (escolha == -1) return -1;
+        if (escolha == 0) return 0;
+        if (escolha < 1) { printf("Opcao invalida.\n"); continue; }
+        if (fichaAgenteAdm(escolha - 1) == -1) return -1;
+    }
 }
 
-// Exibe a ficha administrativa do agente na posição indicada.
+// Exibe ficha administrativa e abre edicao ou exclusao real do registro.
 int fichaAgenteAdm(int indiceAgente)
 {
-    int escolha, leituraOk;
     char entrada[TAM];
-
-    if (indiceAgente < 0 || indiceAgente >= quantidadeAgentes)
+    int escolha, leitura, id;
+    if (indiceAgente < 0 || indiceAgente >= quantidadeAgentes) return 0;
+    id = idsAgentes[indiceAgente];
+    for (;;)
     {
-        printf("\nAgente invalido!\n");
-        return 0;
-    }
-
-    do
-    {
-        printf("\n========== FICHA ADMINISTRATIVA ==========\n\n");
-        printf("ID: %d\n",idsAgentes[indiceAgente]);
-        printf("Nome: %s\n",nomesAgentes[indiceAgente]);
-        printf("Categoria: %s\n",categoriasAgentes[indiceAgente]);
-        printf("Descricao: %s\n",descricaoAgentes[indiceAgente]);
-        printf("Instrucoes: %s\n",instrucoesAgentes[indiceAgente]);
-        printf("Status: %s\n",statusAgentes[indiceAgente] == 1 ? "ATIVO" : "INATIVO");
-
-        if (possuiMediaAgentes[indiceAgente] == 1)
+        printf("\n========== FICHA ADMINISTRATIVA ==========\n");
+        printf("ID: %d\n", id);
+        printf("Nome: %s\n", nomesAgentes[indiceAgente]);
+        printf("Categoria: %s\n", categoriasAgentes[indiceAgente]);
+        printf("Descricao: %s\n", descricaoAgentes[indiceAgente]);
+        printf("Instrucoes: %s\n", instrucoesAgentes[indiceAgente]);
+        if (quantidadesAvaliacoesAgentes[indiceAgente] == 0) printf("Nota media: Sem avaliacoes\n");
+        else printf("Nota media: %.1f | Total: %d\n", mediasAgentes[indiceAgente], quantidadesAvaliacoesAgentes[indiceAgente]);
+        printf("\n[1] Editar\n");
+        printf("[2] Excluir DEFINITIVAMENTE\n");
+        printf("[0] Voltar\n");
+        printf("[-1] Encerrar\n");
+        printf("Opcao: ");
+        leitura = lerEntrada(entrada, sizeof(entrada));
+        if (leitura == -1) return -1;
+        if (leitura != 1) continue;
+        escolha = validarEntrada(entrada, 2);
+        switch (escolha)
         {
-            printf("Nota media: %.1f\n",mediasAgentes[indiceAgente]);
-        }
-        else
-        {
-            printf("Nota media: Sem avaliacoes\n");
-        }
-
-        printf("\n[1] Editar informacoes");
-        printf("\n[0] Voltar a consulta");
-        printf("\n[-1] Encerrar o sistema");
-        printf("\n\nEscolha uma opcao: ");
-
-        leituraOk = lerEntrada(entrada,sizeof(entrada));
-
-        if (leituraOk == -1)
-        {
-            return -1;
-        }
-
-        if (leituraOk != 1)
-        {
-            printf("\nEntrada invalida!\n");
-            continue;
-        }
-
-        escolha = validarEntrada(entrada,1);
-
-        if (escolha == -1)
-        {
-            return -1;
-        }
-
-        if (escolha == 0)
-        {
-            return 0;
-        }
-
-        if (escolha == 1)
-        {
-            if (editarAgente(indiceAgente) == -1)
-            {
+            case -1:
                 return -1;
-            }
-
-            continue;
+            case 0:
+                return 0;
+            case 1:
+                if (editarAgente(indiceAgente) == -1) return -1;
+                continue;
+            case 2:
+                printf("Confirma excluir ID %d e suas avaliacoes?\n", id);
+                printf("[1] Sim\n");
+                printf("[0] Nao\n");
+                printf("[-1] Encerrar\n");
+                printf("Opcao: ");
+                leitura = lerEntrada(entrada, sizeof(entrada));
+                if (leitura == -1) return -1;
+                if (leitura != 1) continue;
+                escolha = validarEntrada(entrada, 1);
+                if (escolha == -1) return -1;
+                if (escolha == 1)
+                {
+                    excluirAgente(indiceAgente);
+                    printf("Agente excluido da RAM. Salve ao encerrar!\n");
+                    return 0;
+                }
+                printf("Exclusao cancelada.\n");
+                continue;
+            default:
+                printf("Opcao invalida.\n");
+                break;
         }
-
-        printf("\nOpcao invalida!\n");
-
-    } while (1);
+    }
 }
 
-// Busca um agente pelo ID permanente e abre sua ficha administrativa.
+// Procura um ID real, nao a posicao de exibicao.
 int buscarAgentePorId(void)
 {
     char entrada[20];
-    int idBuscado, leituraOk;
-
-    printf("\n========== BUSCAR AGENTE POR ID ==========\n");
-    printf("\nDigite o ID do agente:");
-    printf("\n[0] Voltar");
-    printf("\n[-1] Encerrar o sistema");
-    printf("\n\nID: ");
-
-    leituraOk = lerEntrada(entrada,sizeof(entrada));
-
-    if (leituraOk == -1)
-    {
-        return -1;
-    }
-
-    if (leituraOk != 1)
-    {
-        printf("\nEntrada invalida!\n");
-        return 0;
-    }
-
-    idBuscado = validarEntrada(entrada,999999);
-
-    if (idBuscado == -1)
-    {
-        return -1;
-    }
-
-    if (idBuscado == 0)
-    {
-        return 0;
-    }
-
-    if (idBuscado == -2)
-    {
-        printf("\nID invalido!\n");
-        return 0;
-    }
-
+    int escolha, leitura;
+    printf("\nDigite o ID (0=voltar, -1=encerrar): ");
+    leitura = lerEntrada(entrada, sizeof(entrada));
+    if (leitura == -1) return -1;
+    if (leitura != 1) return 0;
+    escolha = validarEntrada(entrada, 999999);
+    if (escolha == -1) return -1;
+    if (escolha == 0) return 0;
+    if (escolha == -2) { printf("ID invalido.\n"); return 0; }
     for (int i = 0; i < quantidadeAgentes; i++)
-    {
-        if (idsAgentes[i] == idBuscado)
-        {
-            return fichaAgenteAdm(i);
-        }
-    }
-
-    printf("\nAgente nao encontrado!\n");
+        if (idsAgentes[i] == escolha) return fichaAgenteAdm(i);
+    printf("Agente nao encontrado.\n");
     return 0;
 }
 
-// Busca agentes por trecho do nome e permite selecionar um resultado.
+// Encontra nomes contendo o trecho digitado e abre a ficha da posicao escolhida.
 int buscarAgentePorNome(void)
 {
-    char nomeBusca[MAX_NOME];
-    char entrada[TAM];
-    int posicoes[MAX_AGENTES];
-    int encontrados = 0;
-    int leituraOk, escolha;
-
-    printf("\n========== BUSCAR AGENTE POR NOME ==========\n");
-    printf("\nDigite o nome ou parte do nome:");
-    printf("\n[-1] Encerrar o sistema");
-    printf("\n\nNome: ");
-
-    leituraOk = lerEntrada(nomeBusca,sizeof(nomeBusca));
-
-    if (leituraOk == -1)
-    {
-        return -1;
-    }
-
-    if (leituraOk != 1 || nomeBusca[0] == '\0')
-    {
-        printf("\nNome invalido!\n");
-        return 0;
-    }
-
-    if (strcmp(nomeBusca,"-1") == 0)
-    {
-        return -1;
-    }
-
+    char trecho[MAX_NOME], entrada[TAM];
+    int posicoes[MAX_AGENTES], encontrados = 0, leitura, escolha;
+    printf("\nNome ou parte do nome (-1=encerrar): ");
+    leitura = lerEntrada(trecho, sizeof(trecho));
+    if (leitura == -1) return -1;
+    if (leitura != 1 || trecho[0] == '\0') { printf("Nome invalido.\n"); return 0; }
+    if (strcmp(trecho, "-1") == 0) return -1;
     for (int i = 0; i < quantidadeAgentes; i++)
-    {
-        if (strstr(nomesAgentes[i],nomeBusca) != NULL)
+        if (strstr(nomesAgentes[i], trecho) != NULL)
         {
             posicoes[encontrados] = i;
             encontrados++;
-
-            printf("\n[%d] ID: %d - %s - %s",
-                   encontrados,idsAgentes[i],nomesAgentes[i],
-                   statusAgentes[i] == 1 ? "ATIVO" : "INATIVO");
+            printf("[%d] ID %d - %s\n", encontrados, idsAgentes[i], nomesAgentes[i]);
         }
-    }
-
-    if (encontrados == 0)
-    {
-        printf("\nNenhum agente encontrado!\n");
-        return 0;
-    }
-
-    printf("\n\n[0] Voltar ao painel administrativo");
-    printf("\n[-1] Encerrar o sistema");
-    printf("\n\nEscolha um agente: ");
-
-    leituraOk = lerEntrada(entrada,sizeof(entrada));
-
-    if (leituraOk == -1)
-    {
-        return -1;
-    }
-
-    if (leituraOk != 1)
-    {
-        printf("\nEntrada invalida!\n");
-        return 0;
-    }
-
-    escolha = validarEntrada(entrada,encontrados);
-
-    if (escolha == -1)
-    {
-        return -1;
-    }
-
-    if (escolha == 0)
-    {
-        return 0;
-    }
-
-    if (escolha < 1 || escolha > encontrados)
-    {
-        printf("\nOpcao invalida!\n");
-        return 0;
-    }
-
-    return fichaAgenteAdm(posicoes[escolha - 1]);
+    if (encontrados == 0) { printf("Nenhum agente encontrado.\n"); return 0; }
+    printf("[0] Voltar\n");
+    printf("[-1] Encerrar\n");
+    printf("Escolha: ");
+    leitura = lerEntrada(entrada, sizeof(entrada));
+    if (leitura == -1) return -1;
+    if (leitura != 1) return 0;
+    escolha = validarEntrada(entrada, encontrados);
+    if (escolha == -1) return -1;
+    if (escolha >= 1 && escolha <= encontrados)
+        return fichaAgenteAdm(posicoes[escolha-1]);
+    return 0;
 }

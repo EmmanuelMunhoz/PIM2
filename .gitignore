@@ -1,7 +1,8 @@
-# Executaveis e arquivos gerados pelo compilador
+# Binarios e arquivos locais de teste
 *.exe
 *.o
 *.obj
-
-# Configuracoes locais do VS Code
-.vscode/
+/pim2
+*.log
+*.bak
+/testes/__pycache__/

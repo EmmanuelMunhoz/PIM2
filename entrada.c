@@ -1,108 +1,73 @@
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
-#include "functions.h"
+#include <string.h>
+#include "entrada.h"
 
-// Descarta os caracteres restantes da linha de entrada.
+// Descarta o restante de uma entrada que ultrapassou a capacidade.
 void limparBuffer(void)
 {
     int c;
-    while((c = getchar()) != '\n' && c != EOF);
+    while ((c = getchar()) != '\n' && c != EOF) { }
 }
 
-// Valida uma opção numérica; retorna -1 para encerrar e -2 para entrada inválida.
+// Aceita inteiros entre zero e o limite, ou -1 (pedido de encerramento).
+// Devolve -2 para texto vazio, letras, numeros fora do limite e negativos invalidos.
 int validarEntrada(char entrada[], int limiteMaximo)
 {
     int i = 0;
     int numero;
-
-    if (entrada[0] == '-' && entrada[1] == '1' && (entrada[2] == '\0' || entrada[2] == '\n'))
+    if (strcmp(entrada, "-1") == 0) return -1;
+    if (entrada[0] == '\0') return -2;
+    while (entrada[i] != '\0')
     {
-        return -1;
-    }
-
-    if (entrada[0] == '\0' || entrada[0] == '\n')
-    {
-        return -2;
-    }
-
-    while (entrada[i] != '\0' && entrada[i] != '\n')
-    {
-        if (entrada[i] < '0' || entrada[i] > '9')
-        {
-            return -2;
-        }
-
+        if (entrada[i] < '0' || entrada[i] > '9') return -2;
         i++;
     }
-
+    // Limita o tamanho antes de converter para evitar estouro no atoi.
+    if (i > 6) return -2;
     numero = atoi(entrada);
-
-    if (numero >= 0 && numero <= limiteMaximo)
-    {
-        return numero;
-    }
-
+    if (numero >= 0 && numero <= limiteMaximo) return numero;
     return -2;
 }
 
-// Lê uma linha limitada e retorna 1, 0 ou -1 conforme o resultado da leitura.
+// Le uma linha da entrada padrao: 1=sucesso, 0=texto longo, -1=EOF/erro.
 int lerEntrada(char entrada[], int capacidade)
 {
+    int c;
+    int posicao;
+    char *resultadoLeitura;
 
-    if(capacidade <2)
+    if (capacidade < 2)
+    {
+        return 0;
+    }
+
+    resultadoLeitura = fgets(entrada, capacidade, stdin);
+    if (resultadoLeitura == NULL)
     {
         return -1;
     }
 
-    int leituraOK;
-    leituraOK = (fgets(entrada, capacidade, stdin) != NULL);
+    posicao = strcspn(entrada, "\n");
+    if (entrada[posicao] == '\n')
+    {
+        entrada[posicao] = '\0';
+        return 1;
+    }
 
-    if(leituraOK == 1)
+    // Verifica se o texto terminou no limite permitido ou se ultrapassou esse limite.
+    c = getchar();
+    if (c == '\n' || c == EOF)
     {
-        if(strchr(entrada,'\n') != NULL)
+        if (ferror(stdin))
         {
-            entrada[strcspn(entrada,"\n")] = '\0';
-            return 1;
+            return -1;
         }
-        else
-        {
-            int procurarN = getchar();
-            
-            if (procurarN == '\n')
-            {
-                return 1;
-            }
-            if (procurarN == EOF)
-            {
-                if(ferror(stdin))
-                {
-                    return -1;
-                }
-                else
-                {
-                    return 1;
-                }
-            }
-            limparBuffer();
-            printf("\033[31m ⚠️  Entrada excedeu o tamanho máximo permitido ⚠️ \033[0m\n\n");
-            return 0;
-        }
+        return 1;
     }
-    else
-    {
-        if (feof(stdin))
-        {
-            printf("Entrada encerrada (EOF).\n");
-        }
-        else if (ferror(stdin))
-        {
-            printf("Erro ao ler a entrada.\n");
-        }
-        else
-        {
-            printf("Falha de leitura desconhecida.\n");
-        }
-        return -1;
-    }
+
+    limparBuffer();
+    
+    printf("Entrada excedeu o tamanho maximo permitido.\n");
+    return 0;
 }

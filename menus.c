@@ -1,175 +1,158 @@
 #include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include "functions.h"
+#include "menus.h"
+#include "entrada.h"
+#include "dados.h"
+#include "autenticacao.h"
+#include "cadastro.h"
+#include "consultas.h"
+#include "persistencia.h"
 
-// Exibe o menu principal e encaminha para o catálogo ou painel administrativo.
-int menu ()
+// Confirma saida com alteracoes pendentes. 1=sair, 0=cancelar, -1=erro/EOF.
+// Quando o salvamento falha, continua no programa e permite outra tentativa.
+int confirmarSaida(void)
 {
-    int escolha, leituraMenuOk;
-    char entrada [TAM];
-    do
+    char entrada[TAM];
+    int escolha, leitura;
+    if (!alteracoesPendentes) return 1;
+    for (;;)
     {
-        printf("\n----------------------");
-        printf("\nSeja Bem-Vindo\n");
-        printf("----------------------\n\n");
-        printf("Escolha uma das opções abaixo.\n\n");
-        printf("[1] - Catálogo de Agentes.\n");
-        printf("[2] - Painel Administrativo (acesso restrito).\n\n");
-        printf("[0] - Sair\n");
-        printf("[-1] Encerrar o sistema\n\n");
-        printf("Qual opção você deseja escolher: ");
-
-        leituraMenuOk = lerEntrada(entrada,sizeof(entrada));
-
-        if (leituraMenuOk == 1)
+        printf("\nVoce possui alteracoes nao salvas.\n");
+        printf("[1] Salvar e sair\n");
+        printf("[2] Sair sem salvar\n");
+        printf("[0] Cancelar e voltar\n");
+        printf("Escolha: ");
+        leitura = lerEntrada(entrada, TAM);
+        if (leitura == -1) return -1;
+        if (leitura != 1) continue;
+        escolha = validarEntrada(entrada, 2);
+        switch (escolha)
         {
-            escolha = validarEntrada(entrada,2);
-
-            switch (escolha)
-            {
-                case 1:
+            case 0:
+                return 0;
+            case 1:
+                if (salvarAgentes())
                 {
-                    int retornoCatalogo = catalogoAgentes();
-
-                    if (retornoCatalogo == -1)
-                    {
-                        return -1;
-                    }
-
-                    break;
+                    printf("Alteracoes salvas em dados/agentes.json.\n");
+                    return 1;
                 }
-                case 2:
-                {
-                    int validarEntradaAdm = autenticarAdm ();
-
-                    if (validarEntradaAdm == 0)
-                    {
-                        validarEntradaAdm = menuAdm();
-
-                        if (validarEntradaAdm == -1)
-                        {
-                            return -1;
-                        }
-                    }
-                    if (validarEntradaAdm == -1)
-                    {
-                        return -1;
-                    }
-                    break;
-                }
-                case 0:
-                {
-                    printf("Você escolheu a opção: [%d]\n", escolha);
-                    break;
-                }
-                case -1:
-                {
-                    return -1;
-                }
-                default:
-                {
-                    printf("%s",valor_digitado_errado);
-                    leituraMenuOk = 0;
-                }
-            }
+                printf("Falha ao salvar. Programa continua aberto.\n");
+                break;
+            case 2:
+                return 1;
+            default:
+                printf("Opcao invalida.\n");
+                break;
         }
-        if (leituraMenuOk == -1)
-        {
-            return -1;
-        }
-        if (leituraMenuOk == 0)
-        {
-            continue;
-        }
-
-    }while(leituraMenuOk != 1 || escolha != 0);
-    return escolha;
+    }
 }
 
-// Exibe as opções administrativas e encaminha para as operações escolhidas.
-int menuAdm()
+// Exibe o menu principal; centraliza a confirmacao de saida por 0 ou -1.
+
+int menu(void)
 {
-    char entradaMenu[TAM];
-    int retornoEntradaMenu = 0;
-    int escolha;
+    char entrada[TAM];
+    int escolha, leitura, retorno, sair;
 
     do
     {
-        printf("\n\n========== PAINEL ADMINISTRATIVO ==========\n\n");
+        printf("\n========== AI AGENT REGISTRY ==========\n");
+        printf("[1] Catalogo de agentes\n");
+        printf("[2] Painel administrativo\n");
+        printf("[0] Sair\n");
+        printf("[-1] Encerrar\n");
+        printf("Opcao: ");
 
+        leitura = lerEntrada(entrada, TAM);
+
+        if (leitura == -1) return -1;
+        if (leitura != 1) continue;
+
+        escolha = validarEntrada(entrada, 2);
+
+        switch (escolha)
+        {
+            case -1:
+            case 0:
+                sair = confirmarSaida();
+                if (sair == 1) return 0;
+                if (sair == -1) return -1;
+                break;
+
+            case 1:
+                retorno = catalogoAgentes();
+                if (retorno == -1)
+                {
+                    sair = confirmarSaida();
+                    if (sair == 1) return 0;
+                    if (sair == -1) return -1;
+                }
+                break;
+
+            case 2:
+                retorno = autenticarAdm();
+                if (retorno == 1) retorno = menuAdm();
+                if (retorno == -1)
+                {
+                    sair = confirmarSaida();
+                    if (sair == 1) return 0;
+                    if (sair == -1) return -1;
+                }
+                break;
+
+            default:
+                printf("Opcao invalida.\n");
+                break;
+        }
+
+    } while (1);
+}
+
+// Encaminha a escolha administrativa para cadastro, listagem e buscas.
+int menuAdm(void)
+{
+    char entrada[TAM];
+    int escolha, leitura, retorno;
+    for (;;)
+    {
+        printf("\n========== PAINEL ADMINISTRATIVO ==========\n");
         printf("[1] Cadastrar agente\n");
         printf("[2] Listar agentes\n");
-        printf("[3] Buscar agente por ID\n");
-        printf("[4] Buscar agente por nome\n\n");
-        printf("[0] Voltar ao menu principal\n");
-        printf("[-1] Encerrar o sistema\n\n");
+        printf("[3] Buscar por ID\n");
+        printf("[4] Buscar por nome\n");
+        printf("[0] Voltar\n");
+        printf("[-1] Encerrar\n");
+        printf("Opcao: ");
 
-        printf("Escolha uma opção: ");
+        leitura = lerEntrada(entrada, TAM);
 
-        retornoEntradaMenu = lerEntrada(entradaMenu,sizeof(entradaMenu));
+        if (leitura == -1) return -1;
+        if (leitura != 1) continue;
 
-        if (retornoEntradaMenu == 1)
-            {
-                escolha = validarEntrada(entradaMenu,4);
+        escolha = validarEntrada(entrada, 4);
+        retorno = 0;
 
-                switch (escolha)
-                {
-                    case 1:
-                    {
-                        cadastrarAgente();
-                        break;
-                    }
-                    case 2:
-                    {
-                        int retornoListagem = listarAgentesAdm();
-
-                        if (retornoListagem == -1)
-                        {
-                            return -1;
-                        }
-                        break;
-                    }
-                    case 3:
-                    {
-                        if (buscarAgentePorId() == -1)
-                        {
-                            return -1;
-                        }
-                        break;
-                    }
-                    case 4:
-                    {
-                        if (buscarAgentePorNome() == -1)
-                        {
-                            return -1;
-                        }
-                        break;
-                    }
-                    case -1:
-                    {
-                        return -1;
-                    }
-                    case 0:
-                    {
-                        return 0;
-                    }
-                    default:
-                    {
-                        printf("%s",valor_digitado_errado);
-                        retornoEntradaMenu = 0;
-                    }
-                }
-            }
-            if (retornoEntradaMenu == -1)
-            {
+        switch (escolha)
+        {
+            case -1:
                 return -1;
-            }
-            if (retornoEntradaMenu == 0)
-            {
-                continue;
-            }
-    }while(1);
-
-    return 0;
+            case 0:
+                return 0;
+            case 1:
+                cadastrarAgente();
+                break;
+            case 2:
+                retorno = listarAgentesAdm();
+                break;
+            case 3:
+                retorno = buscarAgentePorId();
+                break;
+            case 4:
+                retorno = buscarAgentePorNome();
+                break;
+            default:
+                printf("\033[1;31mOpcao invalida.\033[0m\n");
+                break;
+        }
+        if (retorno == -1) return -1;
+    }
 }
