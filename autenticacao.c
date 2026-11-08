@@ -9,18 +9,22 @@ int autenticarAdm(void)
 {
     const char senhaAdm[] = "@Adminunip";
     char senhaDigitada[20];
-    int tentativas = 3, retorno;
+    int tentativas = 3;
+    int retorno;
 
     while (tentativas > 0)
     {
         printf("\nQual a senha ADM: ");
         retorno = lerEntrada(senhaDigitada, sizeof(senhaDigitada));
 
-        if (retorno == -1) return -1;
+        if (retorno == -1)
+        {
+            return -1;
+        }
 
         if (retorno == 1 && strcmp(senhaDigitada, senhaAdm) == 0)
         {
-            printf("\033[1;32mAcesso permitido!\033[0m\n");
+            printf("\n\033[1;32mAcesso permitido!\033[0m\n");
             return 1;
         }
 

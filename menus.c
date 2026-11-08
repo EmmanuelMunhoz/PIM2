@@ -107,9 +107,8 @@ int menu(void)
         printf("\n========== NEXT HOST ==========\n");
         printf("[1] Catalogo de agentes\n");
         printf("[2] Painel administrativo\n");
-        printf("[3] Salvar\n");
         printf("[0] Sair\n");
-        printf("Opcao: ");
+        printf("\nOpcao: ");
 
         leitura = lerEntrada(entrada, TAM);
 
@@ -123,7 +122,7 @@ int menu(void)
             continue;
         }
 
-        escolha = validarEntrada(entrada, 3);
+        escolha = validarEntrada(entrada, 2);
 
         switch (escolha)
         {
@@ -185,10 +184,6 @@ int menu(void)
                         return -1;
                     }
                 }
-                break;
-
-            case 3:
-                salvarAlteracoes();
                 break;
 
             default:

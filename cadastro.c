@@ -46,6 +46,7 @@ void cadastrarAgente(void)
 {
     int indice = quantidadeAgentes;
     int maior = 0;
+    int retorno;
     if (quantidadeAgentes >= MAX_AGENTES)
     {
         printf("Capacidade de %d agentes atingida.\n", MAX_AGENTES);
@@ -63,10 +64,27 @@ void cadastrarAgente(void)
         printf("Limite de identificadores atingido.\n");
         return;
     }
-    if (pedirCampo(nomesAgentes[indice], MAX_NOME, "Nome: ") != 1 ||
-        pedirCampo(descricaoAgentes[indice], MAX_DESCRICAO, "Descricao: ") != 1 ||
-        pedirCampo(categoriasAgentes[indice], MAX_CATEGORIA, "Categoria: ") != 1 ||
-        pedirCampo(instrucoesAgentes[indice], MAX_INSTRUCOES, "Instrucoes: ") != 1)
+    printf("\n");
+    retorno = pedirCampo(nomesAgentes[indice], MAX_NOME, "Nome: ");
+    if (retorno != 1)
+    {
+        printf("Cadastro cancelado.\n");
+        return;
+    }
+    retorno = pedirCampo(descricaoAgentes[indice], MAX_DESCRICAO, "Descricao: ");
+    if (retorno != 1)
+    {
+        printf("Cadastro cancelado.\n");
+        return;
+    }
+    retorno = pedirCampo(categoriasAgentes[indice], MAX_CATEGORIA, "Categoria: ");
+    if (retorno != 1)
+    {
+        printf("Cadastro cancelado.\n");
+        return;
+    }
+    retorno = pedirCampo(instrucoesAgentes[indice], MAX_INSTRUCOES, "Instrucoes: ");
+    if (retorno != 1)
     {
         printf("Cadastro cancelado.\n");
         return;
@@ -76,7 +94,10 @@ void cadastrarAgente(void)
     quantidadesAvaliacoesAgentes[indice] = 0;
     quantidadeAgentes++;
     alteracoesPendentes = 1;
-    printf("Agente ID %d cadastrado na memoria. Salve ao sair!\n", idsAgentes[indice]);
+    printf("\n\033[1;32mCadastro realizado com sucesso!\033[0m\n");
+    printf("Agente: %s | ID: %d\n", nomesAgentes[indice], idsAgentes[indice]);
+    printf("Cadastro somente na memoria RAM.\n");
+    printf("Alteracoes pendentes. Utilize a opcao Salvar para confirmar no arquivo.\n");
 }
 
 // Edita nome, descricao, categoria ou instrucoes do agente na RAM.

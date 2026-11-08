@@ -34,10 +34,10 @@ int catalogoAgentes(void)
             printf("Nenhum agente cadastrado.\n");
         }
 
-        printf("\n[%d] Salvar\n", quantidadeAgentes + 1);
-        printf("[0] Voltar\n");
+        printf("\n[0] Voltar\n");
         printf("[-1] Encerrar\n");
-        printf("Escolha um agente: ");
+        printf("[-2] Salvar\n");
+        printf("\nEscolha uma opcao: ");
 
         leitura = lerEntrada(entrada, sizeof(entrada));
 
@@ -51,7 +51,13 @@ int catalogoAgentes(void)
             continue;
         }
 
-        escolha = validarEntrada(entrada, quantidadeAgentes + 1);
+        if (strcmp(entrada, "-2") == 0)
+        {
+            salvarAlteracoes();
+            continue;
+        }
+
+        escolha = validarEntrada(entrada, quantidadeAgentes);
 
         if (escolha == -1)
         {
@@ -66,12 +72,6 @@ int catalogoAgentes(void)
         if (escolha < 1)
         {
             printf("Opcao invalida.\n");
-            continue;
-        }
-
-        if (escolha == quantidadeAgentes + 1)
-        {
-            salvarAlteracoes();
             continue;
         }
 
@@ -95,7 +95,7 @@ int catalogoAgentes(void)
             printf("\n[1] Avaliar agente\n");
             printf("[0] Voltar\n");
             printf("[-1] Encerrar\n");
-            printf("Opcao: ");
+            printf("\nOpcao: ");
             leitura = lerEntrada(entrada, sizeof(entrada));
             if (leitura == -1)
             {
@@ -208,9 +208,9 @@ int listarAgentesAdm(void)
         {
             printf("Nenhum agente cadastrado.\n");
         }
-        printf("[0] Voltar\n");
+        printf("\n[0] Voltar\n");
         printf("[-1] Encerrar\n");
-        printf("Escolha: ");
+        printf("\nEscolha: ");
         leitura = lerEntrada(entrada, sizeof(entrada));
         if (leitura == -1)
         {
@@ -340,7 +340,10 @@ int buscarAgentePorId(void)
     char entrada[20];
     int escolha;
     int leitura;
-    printf("\nDigite o ID (0=voltar, -1=encerrar): ");
+    printf("\n========== BUSCAR AGENTE POR ID ==========\n");
+    printf("\n[0] Voltar\n");
+    printf("[-1] Encerrar\n");
+    printf("\nDigite o ID: ");
     leitura = lerEntrada(entrada, sizeof(entrada));
     if (leitura == -1)
     {
@@ -385,7 +388,10 @@ int buscarAgentePorNome(void)
     int leitura;
     int escolha;
 
-    printf("\nNome ou parte do nome (-1=encerrar): ");
+    printf("\n========== BUSCAR AGENTE POR NOME ==========\n");
+    printf("\n[0] Voltar\n");
+    printf("[-1] Encerrar\n");
+    printf("\nNome ou parte do nome: ");
 
     leitura = lerEntrada(trecho, sizeof(trecho));
 
@@ -397,6 +403,11 @@ int buscarAgentePorNome(void)
     if (leitura != 1 || trecho[0] == '\0')
     {
         printf("Nome invalido.\n");
+        return 0;
+    }
+
+    if (strcmp(trecho, "0") == 0)
+    {
         return 0;
     }
 
@@ -412,8 +423,6 @@ int buscarAgentePorNome(void)
         {
             posicoes[encontrados] = i;
             encontrados++;
-
-            printf("[%d] ID %d - %s\n",encontrados, idsAgentes[i], nomesAgentes[i]);
         }
     }
 
@@ -423,9 +432,16 @@ int buscarAgentePorNome(void)
         return 0;
     }
 
-    printf("[0] Voltar\n");
+    printf("\n========== RESULTADO DA BUSCA ==========\n");
+    for (int i = 0; i < encontrados; i++)
+    {
+        int indice = posicoes[i];
+        printf("[%d] ID %d - %s\n", i + 1, idsAgentes[indice], nomesAgentes[indice]);
+    }
+
+    printf("\n[0] Voltar\n");
     printf("[-1] Encerrar\n");
-    printf("Escolha: ");
+    printf("\nEscolha: ");
 
     leitura = lerEntrada(entrada, sizeof(entrada));
 
