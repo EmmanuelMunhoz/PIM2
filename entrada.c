@@ -16,15 +16,29 @@ int validarEntrada(char entrada[], int limiteMaximo)
 {
     int i = 0;
     int numero;
-    if (strcmp(entrada, "-1") == 0) return -1;
-    if (entrada[0] == '\0') return -2;
+
+    if (strcmp(entrada, "-1") == 0) 
+    {
+        return -1;
+    }
+    
+    if (entrada[0] == '\0') 
+    {
+        return -2;
+    }
+    
     while (entrada[i] != '\0')
     {
         if (entrada[i] < '0' || entrada[i] > '9') return -2;
         i++;
     }
+
     // Limita o tamanho antes de converter para evitar estouro no atoi.
-    if (i > 6) return -2;
+    if (i > 6) 
+    {
+        return -2;
+    }
+    
     numero = atoi(entrada);
     if (numero >= 0 && numero <= limiteMaximo) return numero;
     return -2;
@@ -43,12 +57,14 @@ int lerEntrada(char entrada[], int capacidade)
     }
 
     resultadoLeitura = fgets(entrada, capacidade, stdin);
+
     if (resultadoLeitura == NULL)
     {
         return -1;
     }
 
     posicao = strcspn(entrada, "\n");
+
     if (entrada[posicao] == '\n')
     {
         entrada[posicao] = '\0';

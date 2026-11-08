@@ -4,5 +4,6 @@
 int menu(void);
 int menuAdm(void);
 int confirmarSaida(void);
+void salvarAlteracoes(void);
 
 #endif

@@ -5,7 +5,7 @@
 #define TAM 16
 #define MAX_AGENTES 50
 #define MAX_NOME 81
-#define MAX_DESCRICAO 1001
+#define MAX_DESCRICAO 301
 #define MAX_CATEGORIA 51
 #define MAX_INSTRUCOES 1001
 

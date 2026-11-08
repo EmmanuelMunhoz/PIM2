@@ -21,7 +21,10 @@ int carregarAgentes(void)
     int indiceAgente = 0;
 
     arquivo = fopen("dados/agentes.json", "r");
-    if (arquivo == NULL) { return 0; }
+    if (arquivo == NULL)
+    {
+        return 0;
+    }
 
     leitura = fscanf(arquivo, " %c", &marcador);
 
@@ -35,14 +38,25 @@ int carregarAgentes(void)
     {
         leitura = fscanf(arquivo, " %c", &marcador);
 
-        if (leitura != 1 || marcador == ']') { break; }
-        if (marcador == ',') { continue; }
-        if (marcador != '{' || indiceAgente >= MAX_AGENTES) { break; }
+        if (leitura != 1 || marcador == ']')
+        {
+            break;
+        }
+
+        if (marcador == ',')
+        {
+            continue;
+        }
+
+        if (marcador != '{' || indiceAgente >= MAX_AGENTES)
+        {
+            break;
+        }
 
         camposLidos = fscanf(arquivo,
             " \"id\": %d,"
             " \"nome\": \"%80[^\"]\","
-            " \"descricao\": \"%1000[^\"]\","
+            " \"descricao\": \"%300[^\"]\","
             " \"categoria\": \"%50[^\"]\","
             " \"instrucoes\": \"%1000[^\"]\","
             " \"notaMedia\": %39[^,],"
@@ -54,7 +68,10 @@ int carregarAgentes(void)
             instrucoesAgentes[indiceAgente],
             nota,&quantidadesAvaliacoesAgentes[indiceAgente],&fechamento);
 
-        if (camposLidos != 8 || fechamento != '}') { break; }
+        if (camposLidos != 8 || fechamento != '}')
+        {
+            break;
+        }
 
         mediasAgentes[indiceAgente] = 0.0;
         sscanf(nota, "%lf", &mediasAgentes[indiceAgente]);
@@ -64,7 +81,10 @@ int carregarAgentes(void)
 
     fclose(arquivo);
 
-    if (marcador != ']') { return 0; }
+    if (marcador != ']')
+    {
+        return 0;
+    }
 
     quantidadeAgentes = indiceAgente;
     alteracoesPendentes = 0;
@@ -77,8 +97,13 @@ int salvarAgentes(void)
 {
     FILE *arquivo = fopen("dados/agentes.json", "w");
     int erro = 0;
-    if (arquivo == NULL) { printf("Falha ao abrir agentes.json para salvar.\n"); return 0; }
+    if (arquivo == NULL)
+    {
+        printf("Falha ao abrir agentes.json para salvar.\n");
+        return 0;
+    }
     fprintf(arquivo, "[\n");
+
     for (int i = 0; i < quantidadeAgentes; i++)
     {
         fprintf(arquivo, "  {\n");
@@ -88,16 +113,32 @@ int salvarAgentes(void)
         fprintf(arquivo, "    \"categoria\": \"%s\",\n", categoriasAgentes[i]);
         fprintf(arquivo, "    \"instrucoes\": \"%s\",\n", instrucoesAgentes[i]);
         if (quantidadesAvaliacoesAgentes[i] == 0)
+        {
             fprintf(arquivo, "    \"notaMedia\": null,\n");
+        }
         else
+        {
             fprintf(arquivo, "    \"notaMedia\": %.17g,\n", mediasAgentes[i]);
+        }
         fprintf(arquivo, "    \"quantidadeAvaliacoes\": %d\n", quantidadesAvaliacoesAgentes[i]);
         fprintf(arquivo, "  }%s\n", i + 1 < quantidadeAgentes ? "," : "");
     }
+
     fprintf(arquivo, "]\n");
-    if (ferror(arquivo)) erro = 1;
-    if (fclose(arquivo) == EOF) erro = 1;
-    if (erro) { printf("Erro ao gravar agentes.json. Confira o arquivo.\n"); return 0; }
+
+    if (ferror(arquivo))
+    {
+        erro = 1;
+    }
+    if (fclose(arquivo) == EOF)
+    {
+        erro = 1;
+    }
+    if (erro)
+    {
+        printf("Erro ao gravar agentes.json. Confira o arquivo.\n");
+        return 0;
+    }
     alteracoesPendentes = 0;
     return 1;
 }
@@ -108,9 +149,14 @@ int registrarAvaliacao(int indiceAgente, int nota)
 {
     int n;
     if (indiceAgente < 0 || indiceAgente >= quantidadeAgentes || nota < 0 || nota > 5)
+    {
         return 0;
+    }
     n = quantidadesAvaliacoesAgentes[indiceAgente];
-    if (n == INT_MAX) return 0;
+    if (n == INT_MAX)
+    {
+        return 0;
+    }
     mediasAgentes[indiceAgente] = calcularNovaMedia(mediasAgentes[indiceAgente], n, nota);
     quantidadesAvaliacoesAgentes[indiceAgente] = n + 1;
     alteracoesPendentes = 1;
