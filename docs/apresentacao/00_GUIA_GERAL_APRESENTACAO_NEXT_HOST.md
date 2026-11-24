@@ -82,7 +82,9 @@ Faça este ensaio em **outra cópia temporária**, fora da sequência principal,
 
 ## Versão de referência
 
-Os números de linha e as telas dos roteiros correspondem ao **código local revisado**, sobre o commit `ab996ce6274d807450e71a11dfee8650a9d2a2ae`. Quando o guia foi preparado, as melhorias de código ainda estavam locais, inclusive a média com uma casa e o novo prompt de senha. Um checkout público só com a documentação pode mostrar mensagens, formatação e números de linha anteriores. O catálogo inicial da demonstração vem do commit acima, independentemente dos dados na árvore de trabalho.
+Os números de linha e as telas dos roteiros acompanham o código revisado do repositório. O script extrai o catálogo de 12 agentes do commit `ab996ce6274d807450e71a11dfee8650a9d2a2ae` para manter o mesmo ponto de partida em cada ensaio. A cópia `dados/agentes copy.json` contém esses mesmos 12 agentes.
+
+O arquivo de trabalho `dados/agentes.json` já contém o agente de teste de ID **13**. Iniciar a demonstração com esse arquivo faria o Atlas Demo receber o ID **14**, e a busca por **13** abriria o agente de teste. Use a pasta isolada criada pelo procedimento deste guia para reproduzir os exemplos.
 
 O manual técnico **NEXT HOST - Manual Interno Completo**, de 187 páginas, é referência de estudo complementar. Em caso de diferença de texto ou numeração, use os trechos indicados nos roteiros e o código local compilado para a apresentação.
 

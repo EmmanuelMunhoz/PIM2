@@ -32,9 +32,9 @@ int pedirCampo(char destino[], int capacidade, const char rotulo[])
     {
         return -1;
     }
-    if (retorno != 1 || !textoValido(destino))
+    if (retorno != 1 || textoValido(destino) == 0)
     {
-        printf("Campo vazio ou com caracteres invalidos (aspas/barra invertida).\n");
+        printf("Campo vazio ou com caracteres inválidos (aspas ou barra invertida).\n");
         return 0;
     }
     return 1;
@@ -71,7 +71,7 @@ void cadastrarAgente(void)
         printf("Cadastro cancelado.\n");
         return;
     }
-    retorno = pedirCampo(descricaoAgentes[indice], MAX_DESCRICAO, "Descricao: ");
+    retorno = pedirCampo(descricaoAgentes[indice], MAX_DESCRICAO, "Descrição: ");
     if (retorno != 1)
     {
         printf("Cadastro cancelado.\n");
@@ -83,7 +83,7 @@ void cadastrarAgente(void)
         printf("Cadastro cancelado.\n");
         return;
     }
-    retorno = pedirCampo(instrucoesAgentes[indice], MAX_INSTRUCOES, "Instrucoes: ");
+    retorno = pedirCampo(instrucoesAgentes[indice], MAX_INSTRUCOES, "Instruções: ");
     if (retorno != 1)
     {
         printf("Cadastro cancelado.\n");
@@ -96,8 +96,8 @@ void cadastrarAgente(void)
     alteracoesPendentes = 1;
     printf("\n\033[1;32mCadastro realizado com sucesso!\033[0m\n");
     printf("Agente: %s | ID: %d\n", nomesAgentes[indice], idsAgentes[indice]);
-    printf("Cadastro somente na memoria RAM.\n");
-    printf("Alteracoes pendentes. Utilize a opcao Salvar para confirmar no arquivo.\n");
+    printf("Cadastro registrado apenas na memória RAM.\n");
+    printf("Alterações pendentes. Use a opção Salvar para gravá-las no arquivo.\n");
 }
 
 // Edita nome, descricao, categoria ou instrucoes do agente na RAM.
@@ -118,12 +118,12 @@ int editarAgente(int indiceAgente)
     {
         printf("\n=== EDITAR: %s (ID %d) ===\n", nomesAgentes[indiceAgente], idsAgentes[indiceAgente]);
         printf("[1] Nome\n");
-        printf("[2] Descricao\n");
+        printf("[2] Descrição\n");
         printf("[3] Categoria\n");
-        printf("[4] Instrucoes\n");
+        printf("[4] Instruções\n");
         printf("[0] Voltar\n");
         printf("[-1] Encerrar\n");
-        printf("Opcao: ");
+        printf("Opção: ");
         retorno = lerEntrada(entrada, sizeof(entrada));
         if (retorno == -1)
         {
@@ -167,7 +167,7 @@ int editarAgente(int indiceAgente)
         }
         if (destino == NULL)
         {
-            printf("Opcao invalida.\n");
+            printf("Opção inválida.\n");
             continue;
         }
         printf("Novo texto: ");
@@ -176,9 +176,9 @@ int editarAgente(int indiceAgente)
         {
             return -1;
         }
-        if (retorno != 1 || !textoValido(novoTexto))
+        if (retorno != 1 || textoValido(novoTexto) == 0)
         {
-            printf("Texto invalido.\n");
+            printf("Texto inválido.\n");
             continue;
         }
         if (strcmp(novoTexto, "-1") == 0)
@@ -189,13 +189,13 @@ int editarAgente(int indiceAgente)
         {
             strcpy(destino, novoTexto);
             alteracoesPendentes = 1;
-            printf("Alteracao registrada na RAM.\n");
+            printf("Alteração registrada na memória RAM.\n");
         }
     } while (1);
 }
 
-// Remove FISICAMENTE o agente e seus totais, deslocando TODOS os vetores.
-// IDs dos agentes restantes nao sao modificados; a quantidade diminui.
+// Compacta os vetores paralelos em RAM e reduz a quantidade de agentes ativos.
+// Os IDs restantes são preservados e a última posição fica fora da faixa ativa.
 int excluirAgente(int indiceAgente)
 {
     if (indiceAgente < 0 || indiceAgente >= quantidadeAgentes)

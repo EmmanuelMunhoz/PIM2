@@ -14,7 +14,7 @@ int autenticarAdm(void)
 
     while (tentativas > 0)
     {
-        printf("\nQual a senha ADM: ");
+        printf("\nInforme a senha de administrador: ");
         retorno = lerEntrada(senhaDigitada, sizeof(senhaDigitada));
 
         if (retorno == -1)
@@ -30,7 +30,7 @@ int autenticarAdm(void)
 
         tentativas--;
 
-        printf("\033[1;31mSenha invalida. Tentativas restantes: %d\033[0m\n", tentativas);
+        printf("\033[1;31mSenha inválida. Tentativas restantes: %d\033[0m\n", tentativas);
     }
     printf("\033[1;31mAcesso negado. Retornando ao menu.\033[0m\n");
     return 0;

@@ -7,7 +7,15 @@
 void limparBuffer(void)
 {
     int c;
-    while ((c = getchar()) != '\n' && c != EOF) { }
+    while (1)
+    {
+        c = getchar();
+
+        if (c == '\n' || c == EOF)
+        {
+            break;
+        }
+    }
 }
 
 // Aceita inteiros entre zero e o limite, ou -1 (pedido de encerramento).
@@ -29,7 +37,10 @@ int validarEntrada(char entrada[], int limiteMaximo)
     
     while (entrada[i] != '\0')
     {
-        if (entrada[i] < '0' || entrada[i] > '9') return -2;
+        if (entrada[i] < '0' || entrada[i] > '9')
+        {
+            return -2;
+        }
         i++;
     }
 
@@ -40,7 +51,10 @@ int validarEntrada(char entrada[], int limiteMaximo)
     }
     
     numero = atoi(entrada);
-    if (numero >= 0 && numero <= limiteMaximo) return numero;
+    if (numero >= 0 && numero <= limiteMaximo)
+    {
+        return numero;
+    }
     return -2;
 }
 
@@ -84,6 +98,6 @@ int lerEntrada(char entrada[], int capacidade)
 
     limparBuffer();
     
-    printf("Entrada excedeu o tamanho maximo permitido.\n");
+    printf("A entrada excedeu o tamanho máximo permitido.\n");
     return 0;
 }

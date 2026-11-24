@@ -15,18 +15,18 @@ void salvarAlteracoes(void)
 
     if (!alteracoesPendentes)
     {
-        printf("Nao ha alteracoes para salvar.\n");
+        printf("Não há alterações para salvar.\n");
         return;
     }
 
     salvo = salvarAgentes();
     if (salvo)
     {
-        printf("Alteracoes salvas em dados/agentes.json.\n");
+        printf("Alterações salvas em dados/agentes.json.\n");
     }
     else
     {
-        printf("Falha ao salvar. Programa continua aberto.\n");
+        printf("Falha ao salvar. O programa continua aberto.\n");
     }
 }
 
@@ -46,11 +46,11 @@ int confirmarSaida(void)
 
     do
     {
-        printf("\nVoce possui alteracoes nao salvas.\n");
+        printf("\nVocê tem alterações não salvas.\n");
         printf("[1] Salvar e sair\n");
         printf("[2] Sair sem salvar\n");
         printf("[0] Cancelar e voltar\n");
-        printf("Escolha: ");
+        printf("Opção: ");
 
         leitura = lerEntrada(entrada, TAM);
 
@@ -75,18 +75,18 @@ int confirmarSaida(void)
                 salvo = salvarAgentes();
                 if (salvo)
                 {
-                    printf("Alteracoes salvas em dados/agentes.json.\n");
+                    printf("Alterações salvas em dados/agentes.json.\n");
                     return 1;
                 }
 
-                printf("Falha ao salvar. Programa continua aberto.\n");
+                printf("Falha ao salvar. O programa continua aberto.\n");
                 break;
 
             case 2:
                 return 1;
 
             default:
-                printf("Opcao invalida.\n");
+                printf("Opção inválida.\n");
                 break;
         }
 
@@ -105,13 +105,14 @@ int menu(void)
     do
     {
         printf("\n========== NEXT HOST ==========\n");
-        printf("[1] Catalogo de agentes\n");
+        printf("[1] Catálogo de agentes\n");
         printf("[2] Painel administrativo\n");
         printf("[0] Sair\n");
-        printf("\nOpcao: ");
+        printf("\nOpção: ");
 
         leitura = lerEntrada(entrada, TAM);
 
+        // EOF ou erro de leitura retorna -1 sem passar pela confirmação de saída.
         if (leitura == -1)
         {
             return -1;
@@ -187,7 +188,7 @@ int menu(void)
                 break;
 
             default:
-                printf("Opcao invalida.\n");
+                printf("Opção inválida.\n");
                 break;
         }
 
@@ -212,7 +213,7 @@ int menuAdm(void)
         printf("[5] Salvar\n");
         printf("[0] Voltar\n");
         printf("[-1] Encerrar\n");
-        printf("Opcao: ");
+        printf("Opção: ");
 
         leitura = lerEntrada(entrada, TAM);
 
@@ -258,7 +259,7 @@ int menuAdm(void)
                 break;
 
             default:
-                printf("\033[1;31mOpcao invalida.\033[0m\n");
+                printf("\033[1;31mOpção inválida.\033[0m\n");
                 break;
         }
 

@@ -6,7 +6,10 @@
 int main(void)
 {
     int retorno;
-    if (!carregarAgentes())
+
+    retorno = carregarAgentes();
+
+    if (retorno == 0)
     {
         printf("Falha ao carregar os agentes. Programa encerrado.\n");
         return 1;

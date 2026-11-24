@@ -66,8 +66,11 @@ int carregarAgentes(void)
             descricaoAgentes[indiceAgente],
             categoriasAgentes[indiceAgente],
             instrucoesAgentes[indiceAgente],
-            nota,&quantidadesAvaliacoesAgentes[indiceAgente],&fechamento);
+            nota,
+            &quantidadesAvaliacoesAgentes[indiceAgente],
+            &fechamento);
 
+        // São sete campos do agente mais o caractere de fechamento do objeto.
         if (camposLidos != 8 || fechamento != '}')
         {
             break;
@@ -99,13 +102,15 @@ int salvarAgentes(void)
     int erro = 0;
     if (arquivo == NULL)
     {
-        printf("Falha ao abrir agentes.json para salvar.\n");
+        printf("Falha ao abrir o arquivo agentes.json para salvar as alterações.\n");
         return 0;
     }
     fprintf(arquivo, "[\n");
 
     for (int i = 0; i < quantidadeAgentes; i++)
     {
+        const char *separador = "";
+
         fprintf(arquivo, "  {\n");
         fprintf(arquivo, "    \"id\": %d,\n", idsAgentes[i]);
         fprintf(arquivo, "    \"nome\": \"%s\",\n", nomesAgentes[i]);
@@ -121,7 +126,13 @@ int salvarAgentes(void)
             fprintf(arquivo, "    \"notaMedia\": %.17g,\n", mediasAgentes[i]);
         }
         fprintf(arquivo, "    \"quantidadeAvaliacoes\": %d\n", quantidadesAvaliacoesAgentes[i]);
-        fprintf(arquivo, "  }%s\n", i + 1 < quantidadeAgentes ? "," : "");
+
+        if (i + 1 < quantidadeAgentes)
+        {
+            separador = ",";
+        }
+
+        fprintf(arquivo, "  }%s\n", separador);
     }
 
     fprintf(arquivo, "]\n");
@@ -148,7 +159,12 @@ int salvarAgentes(void)
 int registrarAvaliacao(int indiceAgente, int nota)
 {
     int n;
-    if (indiceAgente < 0 || indiceAgente >= quantidadeAgentes || nota < 0 || nota > 5)
+    if (indiceAgente < 0 || indiceAgente >= quantidadeAgentes)
+    {
+        return 0;
+    }
+
+    if (nota < 0 || nota > 5)
     {
         return 0;
     }
